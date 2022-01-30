@@ -12,12 +12,13 @@ import Aides from "../../screens/memberScreens/HelpMember";
 import Deconnexion from "../../screens/adminScreens/Deconnexion";
 import Membres from "../../screens/memberScreens/MemberList";
 import AccueilTab from "./MemAccueilTab";
-import { Icon } from "react-native-elements";
+import { Avatar, Icon } from "react-native-elements";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import axiosInstance from "../../utils/axiosInstance";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext } from "react";
 import HelpStack from "../HelpStack";
+import { Alert } from "react-native";
 
 function getHeaderTitle(route) {
 	// If the focused route is not found, we need to assume it's the initial screen
@@ -41,21 +42,35 @@ function CustomDrawerContent(props) {
 	const { auth, dispatch } = useContext(AuthContext);
 
 	const logout = () => {
-		axiosInstance
-			.post("/auth/logout")
-			.then((res) => {
-				dispatch({
-					type: "LOGOUT_SUCCESS",
-				});
-			})
-			.catch((err) => {
-				//console.log("error while trying to logout user", err);
-			});
+		Alert.alert("ARE YOU SURE YOU WANT TO LOGOUT!!", "You will need to login afterwards", [
+			{
+				text: "Yes logout",
+				onPress: async () => {
+					try {
+						const res = await axiosInstance.post("/auth/logout");
+
+						dispatch({
+							type: "LOGOUT_SUCCESS",
+						});
+					} catch (err) {
+						console.log(err);
+					}
+				},
+			},
+
+			{
+				text: "CANCEL",
+			},
+		]);
 	};
 
 	return (
 		<DrawerContentScrollView {...props}>
-			<DrawerItem label="" icon={() => <Icon name="clear" />} onPress={() => props.navigation.navigate("AccueilTab")} />
+			<DrawerItem
+				label="BACK TO TABS"
+				icon={() => <Icon type="entypo" name="dots-three-horizontal" />}
+				onPress={() => props.navigation.navigate("AccueilTab")}
+			/>
 
 			<DrawerItem
 				label="Membres"
@@ -70,7 +85,7 @@ function CustomDrawerContent(props) {
 			<DrawerItem
 				label="Type D'aides"
 				icon={() => <Icon name="live-help" />}
-				onPress={() => props.navigation.navigate("TypeDaides")}
+				onPress={() => props.navigation.navigate("Aides")}
 			/>
 			{/* <DrawerItem
 				label="Configuration"
@@ -105,6 +120,8 @@ function CustomDrawerContent(props) {
 const Drawer = createDrawerNavigator();
 
 export default function MemAccueilDrawer() {
+	const { auth } = useContext(AuthContext);
+
 	return (
 		<Drawer.Navigator
 			initialRouteName="Details"
@@ -115,9 +132,10 @@ export default function MemAccueilDrawer() {
 						size={40}
 						name="arrow-back"
 						color="white"
-						onPress={() => navigation.goBack()}
+						onPress={() => navigation.openDrawer()}
 					/>
 				),
+
 				headerStyle: {
 					backgroundColor: "#f4511e",
 				},
@@ -130,7 +148,6 @@ export default function MemAccueilDrawer() {
 				name="AccueilTab"
 				component={AccueilTab}
 				options={({ route, navigation }) => ({
-
 					headerTitle: getHeaderTitle(route),
 					headerLeft: () => (
 						<Icon
@@ -139,6 +156,15 @@ export default function MemAccueilDrawer() {
 							name="menu"
 							color="white"
 							onPress={() => navigation.openDrawer()}
+						/>
+					),
+					headerRight: () => (
+						<Avatar
+							containerStyle={{ marginRight: 20 }}
+							size={50}
+							rounded
+							source={{ uri: auth.user.avatar }}
+							onPress={() => navigation.goBack()}
 						/>
 					),
 				})}
@@ -150,9 +176,13 @@ export default function MemAccueilDrawer() {
 			<Drawer.Screen name="Session" component={Session} />
 			<Drawer.Screen name="Exercices" component={Exercices} />
 			{/* <Drawer.Screen name="Dettes" component={Dettes} /> */}
-			<Drawer.Screen name="Aides" options={{
-				headerShown: false
-			  }} component={HelpStack} />
+			<Drawer.Screen
+				name="Aides"
+				options={{
+					headerShown: false,
+				}}
+				component={HelpStack}
+			/>
 			<Drawer.Screen name="Deconnexion" component={Deconnexion} />
 		</Drawer.Navigator>
 	);

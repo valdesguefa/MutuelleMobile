@@ -17,6 +17,9 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import axiosInstance from "../../utils/axiosInstance";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext } from "react";
+import { Alert } from "react-native";
+import MemberStack from "../memberStack";
+import AdminStack from "../adminStack";
 
 function getHeaderTitle(route) {
 	// If the focused route is not found, we need to assume it's the initial screen
@@ -40,21 +43,35 @@ function CustomDrawerContent(props) {
 	const { auth, dispatch } = useContext(AuthContext);
 
 	const logout = () => {
-		axiosInstance
-			.post("/auth/logout")
-			.then((res) => {
-				dispatch({
-					type: "LOGOUT_SUCCESS",
-				});
-			})
-			.catch((err) => {
-				//console.log("error while trying to logout user", err);
-			});
+		Alert.alert("ARE YOU SURE YOU WANT TO LOGOUT!!", "You will need to login afterwards", [
+			{
+				text: "Yes logout",
+				onPress: async () => {
+					try {
+						const res = await axiosInstance.post("/auth/logout");
+
+						dispatch({
+							type: "LOGOUT_SUCCESS",
+						});
+					} catch (err) {
+						console.log(err);
+					}
+				},
+			},
+
+			{
+				text: "CANCEL",
+			},
+		]);
 	};
 
 	return (
 		<DrawerContentScrollView {...props}>
-			<DrawerItem label="" icon={() => <Icon name="clear" />} onPress={() => props.navigation.navigate("AccueilTab")} />
+			<DrawerItem
+				label="BACK TO TABS"
+				icon={() => <Icon type="entypo" name="dots-three-horizontal" />}
+				onPress={() => props.navigation.navigate("AccueilTab")}
+			/>
 
 			<DrawerItem
 				label="Membres"
@@ -115,7 +132,7 @@ export default function AccueilDrawer() {
 						size={40}
 						name="arrow-back"
 						color="white"
-						onPress={() => navigation.goBack()}
+						onPress={() => navigation.openDrawer()}
 					/>
 				),
 
@@ -152,8 +169,8 @@ export default function AccueilDrawer() {
 					),
 				})}
 			/>
-			<Drawer.Screen name="Membres" component={Membres} />
-			<Drawer.Screen name="Administrateurs" component={Administrateurs} />
+			<Drawer.Screen name="Membres" component={MemberStack} />
+			<Drawer.Screen name="Administrateurs" component={AdminStack} />
 			<Drawer.Screen name="TypeDaides" component={TypeDaides} />
 			<Drawer.Screen name="Configurations" component={Configurations} />
 			<Drawer.Screen name="Session" component={Session} />
