@@ -74,7 +74,20 @@ export default function TypeDaides() {
 							}}
 						>
 							{(props) => (
-								<View style={{ flex: 1, opacity: 1, marginTop: 190 }}>
+								<View
+									style={{
+										// paddingVertical: 20,
+										flex: 1,
+										opacity: 1,
+										marginTop: 120,
+										borderBottomWidth: 1,
+										borderBottomColor: "#222",
+										borderTopColor: "#222",
+										borderTopWidth: 1,
+										justifyContent: "center",
+										marginBottom: 120,
+									}}
+								>
 									<TextInput
 										label="Titre de l'aide"
 										mode="outlined"
@@ -121,9 +134,9 @@ export default function TypeDaides() {
 								<Avatar
 									rounded
 									icon={{
-										name: "user",
-										type: "simple-line-icon",
-										color: "red",
+										name: "hand-holding-heart",
+										type: "font-awesome-5",
+										color: "#ff751a",
 									}}
 								/>
 								<ListItem.Content>
