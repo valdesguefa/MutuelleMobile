@@ -1,0 +1,288 @@
+import { Formik } from "formik";
+import React, { useContext, useEffect } from "react";
+import { useState } from "react";
+import { Button, TextInput, HelperText } from "react-native-paper";
+
+import { View, Text, Modal, TouchableWithoutFeedback, Keyboard, ScrollView, FlatList, Alert } from "react-native";
+import { Avatar, Icon, ListItem } from "react-native-elements";
+import FlatButton from "../../shared/button";
+import { globalStyles } from "../../styles/global";
+import * as yup from "yup";
+import { MemberContext } from "../../contexts/memberContext";
+import { UserContext } from "../../contexts/userContext";
+import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
+import { AuthContext } from "../../contexts/AuthContext";
+
+const memberCreateSchema = yup.object({
+	nom: yup.string().required("un nom est requis"),
+	prenom: yup.string().required("un prenom est requis"),
+	telephone: yup
+		.string()
+		.required("un numero de telephone est requis")
+		.test(
+			"isValidNumber",
+			"Numero de telephone invalid",
+			(val) => parseInt(val) > 600000000 && parseInt(val) < 700000000
+		),
+	email: yup.string().required("un email est requis").email("l'email n'est pas sur le bon format"),
+	adresse: yup.string().required("un adresse est requis").min(4, "minimum 4 charactere pour l'addresse"),
+	motDePasse: yup.string().required("un mot de passe est requis").min(4, "minimum 4 charactere pour le mot de passse"),
+	motDePasseR: yup.string().oneOf([yup.ref("motDePasse"), null], "les mot de passes ne correspond pas"),
+});
+
+export default function Membres() {
+	const { users, userDispatch } = useContext(UserContext);
+	const [loading, setLoading] = useState(false);
+	const { members, memberDispatch } = useContext(MemberContext);
+	const [modalOpen, setModalOpen] = useState(false);
+
+	useEffect(() => {
+		const membersGotten = users.filter((user) => user.type == "member");
+		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersGotten });
+	}, []);
+
+	const { auth, dispatch } = useContext(AuthContext);
+
+	const handleCreateMember = async (name, first_name, tel, email, address, password) => {
+		// dispatch({ type: "LOADING" });
+
+		// Request Body
+		const type = "member";
+		const body = JSON.stringify({
+			name,
+			first_name,
+			tel,
+			email,
+			address,
+			password,
+			type,
+		});
+		try {
+			const res = await axiosNoTokenInstance.post("/auth/register", body);
+			console.log("RESULT:", res.data.user);
+			memberDispatch({
+				type: "ADD_MEMBER",
+				payload: res.data.user,
+			});
+			setLoading(false);
+			setModalOpen(false);
+			userDispatch({
+				type: "ADD_USER",
+				payload: res.data.user,
+			});
+
+			Alert.alert("SUCCESS", "A new member has been created", [
+				{
+					text: "OKAY",
+				},
+			]);
+		} catch (err) {
+			// dispatch({ type: "LOADED" });
+			console.log(err.response.data);
+			// Alert.alert("OOPS!", "A user with this credentials does not exist.", [
+			// 	{
+			// 		text: "Understood",
+			// 	},
+			// ]);
+		}
+	};
+
+	return (
+		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+			<View style={globalStyles.container}>
+				<Modal visible={modalOpen} animationType="slide">
+					<View style={globalStyles.container}>
+						<Icon name="close" onPress={() => setModalOpen(false)} />
+						<Formik
+							validationSchema={memberCreateSchema}
+							initialValues={{
+								nom: "",
+								prenom: "",
+								telephone: "",
+								email: "",
+								adresse: "",
+								motDePasse: "",
+								motDePasseR: "",
+							}}
+							onSubmit={(values) => {
+								handleCreateMember(
+									values.nom,
+									values.prenom,
+									values.telephone,
+									values.email,
+									values.adresse,
+									values.motDePasse
+								);
+								// handlePress();
+							}}
+						>
+							{(props) => (
+								<ScrollView style={{ flex: 1, opacity: 1, paddingTop: 15 }}>
+									<TextInput
+										label="Nom"
+										mode="outlined"
+										onChangeText={props.handleChange("nom")}
+										value={props.values.nom}
+										onBlur={props.handleBlur("nom")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.nom && props.errors.nom}
+									</HelperText>
+
+									<TextInput
+										label="Prenom"
+										mode="outlined"
+										onChangeText={props.handleChange("prenom")}
+										value={props.values.prenom}
+										onBlur={props.handleBlur("prenom")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.prenom && props.errors.prenom}
+									</HelperText>
+
+									<TextInput
+										keyboardType="numeric"
+										mode="outlined"
+										label="Telephone"
+										onChangeText={props.handleChange("telephone")}
+										value={props.values.telephone}
+										onBlur={props.handleBlur("telephone")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.telephone && props.errors.telephone}
+									</HelperText>
+
+									<TextInput
+										keyboardType="email-address"
+										label="Email"
+										mode="outlined"
+										onChangeText={props.handleChange("email")}
+										value={props.values.email}
+										onBlur={props.handleBlur("email")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.email && props.errors.email}
+									</HelperText>
+
+									<TextInput
+										label="Addresse"
+										mode="outlined"
+										onChangeText={props.handleChange("adresse")}
+										value={props.values.adresse}
+										onBlur={props.handleBlur("adresse")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.adresse && props.errors.adresse}
+									</HelperText>
+
+									<TextInput
+										secureTextEntry={true}
+										label="Mot de passe"
+										mode="outlined"
+										onChangeText={props.handleChange("motDePasse")}
+										value={props.values.motDePasse}
+										onBlur={props.handleBlur("motDePasse")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.motDePasse && props.errors.motDePasse}
+									</HelperText>
+
+									<TextInput
+										secureTextEntry={true}
+										label="Repeter mot de passe"
+										mode="outlined"
+										onChangeText={props.handleChange("motDePasseR")}
+										value={props.values.motDePasseR}
+										onBlur={props.handleBlur("motDePasseR")}
+									/>
+									<HelperText type="error" visible={true}>
+										{props.touched.motDePasseR && props.errors.motDePasseR}
+									</HelperText>
+
+									<FlatButton
+										text={loading ? "loading..." : "ADD Member"}
+										onPress={() => {
+											setLoading(true);
+											props.handleSubmit();
+										}}
+										color="black"
+									/>
+								</ScrollView>
+							)}
+						</Formik>
+					</View>
+				</Modal>
+
+				{members ? (
+					<FlatList
+						data={members}
+						keyExtractor={(member, index) => index.toString()}
+						renderItem={({ item }) => (
+							<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
+								<Avatar
+									rounded
+									icon={{
+										name: "user",
+										type: "simple-line-icon",
+										color: "red",
+									}}
+								/>
+								<ListItem.Content>
+									<ListItem.Title>{`${item.first_name} ${item.name}`}</ListItem.Title>
+									<ListItem.Subtitle>{item.address}</ListItem.Subtitle>
+								</ListItem.Content>
+								<Icon
+									name="delete"
+									type="antdesign"
+									color="red"
+									onPress={() =>
+										Alert.alert("WARNING!!", "This member would be deleted", [
+											{
+												text: "DELETE",
+												onPress: async () => {
+													try {
+														const res = await axiosNoTokenInstance.delete(`/users/${item.id}/`);
+														memberDispatch({
+															type: "DELETE_MEMBER",
+															id: item.id,
+														});
+														userDispatch({
+															type: "DELETE_USER",
+															id: item.id,
+														});
+
+														Alert.alert("SUCCESS", "Member was deleted", [
+															{
+																text: "OKAY",
+															},
+														]);
+													} catch (err) {
+														console.log(err);
+													}
+												},
+											},
+
+											{
+												text: "CANCEL",
+											},
+										])
+									}
+								/>
+							</ListItem>
+						)}
+					/>
+				) : (
+					"loading members...."
+				)}
+				{/* <Button onPress={console.log("MEMBERS LOG:", members)}>Press me</Button> */}
+				<Icon
+					name="add-circle"
+					size={70}
+					color="#f4511e"
+					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
+					onPress={() => setModalOpen(true)}
+				/>
+			</View>
+		</TouchableWithoutFeedback>
+	);
+}
