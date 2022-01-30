@@ -3,7 +3,7 @@ import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { Button, TextInput, HelperText } from "react-native-paper";
 
-import { View, Text, TouchableWithoutFeedback, Keyboard, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableWithoutFeedback, Keyboard, ScrollView, Alert, StyleSheet } from "react-native";
 import { Avatar, Icon, ListItem } from "react-native-elements";
 import FlatButton from "../../shared/button";
 import { globalStyles } from "../../styles/global";
@@ -29,7 +29,7 @@ const configChangeSchema = yup.object({
 export default function Configurations() {
 	const [loading, setLoading] = useState(false);
 	const { configs, configDispatch } = useContext(ConfigContext);
-	console.log("CONFIGS:", configs);
+	// console.log("CONFIGS:", configs);
 	const [modalOpen, setModalOpen] = useState(false);
 
 	const handleSaveConfig = async (interest_per_borrow, social_funds_per_member, inscription_per_member) => {
@@ -71,9 +71,9 @@ export default function Configurations() {
 				<Formik
 					validationSchema={configChangeSchema}
 					initialValues={{
-						interet: configs[0].interest_per_borrow.toString(),
-						fond: configs[0].social_funds_per_member.toString(),
-						inscription: configs[0].inscription_per_member.toString(),
+						interet: configs.interest_per_borrow.toString(),
+						fond: configs.social_funds_per_member.toString(),
+						inscription: configs.inscription_per_member.toString(),
 					}}
 					onSubmit={(values) => {
 						handleSaveConfig(values.interet, values.fond, values.inscription);
@@ -81,7 +81,19 @@ export default function Configurations() {
 					}}
 				>
 					{(props) => (
-						<View style={{ flex: 1, opacity: 1, marginTop: 150 }}>
+						<View
+							style={{
+								flex: 1,
+								opacity: 1,
+								marginTop: 100,
+								borderBottomWidth: 1,
+								borderBottomColor: "#222",
+								borderTopColor: "#222",
+								borderTopWidth: 1,
+								justifyContent: "center",
+								marginBottom: 100,
+							}}
+						>
 							<TextInput
 								keyboardType="numeric"
 								mode="outlined"
@@ -90,7 +102,7 @@ export default function Configurations() {
 								value={props.values.interet}
 								onBlur={props.handleBlur("interet")}
 							/>
-							<HelperText type="error" visible={true}>
+							<HelperText type="error" visible={true} style={styles.helper}>
 								{props.touched.interet && props.errors.interet}
 							</HelperText>
 							<TextInput
@@ -101,7 +113,7 @@ export default function Configurations() {
 								value={props.values.fond}
 								onBlur={props.handleBlur("fond")}
 							/>
-							<HelperText type="error" visible={true}>
+							<HelperText type="error" visible={true} style={styles.helper}>
 								{props.touched.fond && props.errors.fond}
 							</HelperText>
 							<TextInput
@@ -112,7 +124,7 @@ export default function Configurations() {
 								value={props.values.inscription}
 								onBlur={props.handleBlur("inscription")}
 							/>
-							<HelperText type="error" visible={true}>
+							<HelperText type="error" visible={true} style={styles.helper}>
 								{props.touched.inscription && props.errors.inscription}
 							</HelperText>
 
@@ -142,3 +154,9 @@ export default function Configurations() {
 		</TouchableWithoutFeedback>
 	);
 }
+
+const styles = StyleSheet.create({
+	helper: {
+		marginBottom: 20,
+	},
+});
