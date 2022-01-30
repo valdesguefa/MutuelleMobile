@@ -146,7 +146,7 @@ const HelpMember = () => {
 */
     if (fontsLoaded) {
         return (
-            <View style={{alignItems:'center'}}>
+            <View style={{alignItems:'center',marginTop:Dimensions.get('window').height * 0.01,}}>
                 <ScrollView >
                     <Text numberOfLines={2} style={styles.text}>Aides financiaires auxquelles contribuer</Text>
                     <CarouselHelp helpList={activeHelp} />

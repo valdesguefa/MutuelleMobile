@@ -1,5 +1,5 @@
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import DropDownItem from "react-native-drop-down-item";
 import headerObj from "../../shared/token";
 import URL from "../../shared/URL";
@@ -8,11 +8,12 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { LogBox } from "react-native";
 import { Avatar, Button, Card, Title, Paragraph } from "react-native-paper";
 import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const IC_ARR_DOWN = require("../../assets/double_down_26px.png");
 const IC_ARR_UP = require("../../assets/double_up_26px.png");
 
-const DetailsExercice = (props) => {
+const DetailsExercice = () => {
 	const [email, setemail] = useState("");
 	const [password, setpassword] = useState("");
 	const [member, setmember] = useState({});
@@ -33,7 +34,8 @@ const DetailsExercice = (props) => {
 	const [refund, setrefund] = useState([]);
 	const [style1, setstyle1] = useState(Dimensions.get("window").height * 0.25);
 	const [style2, setstyle2] = useState(Dimensions.get("window").height * 0.3);
-
+	const { auth, dispatch } = useContext(AuthContext);
+	//console.log('***********************auth',auth)
 	useEffect(() => {
 		LogBox.ignoreLogs(["Animated: `useNativeDriver`"]);
 		const loadFonts = async () => {
@@ -48,7 +50,7 @@ const DetailsExercice = (props) => {
 
 		var epargn = [];
 		axiosNoTokenInstance
-			.get("/savings")
+			.get("/savings/")
 			.then((response) => {
 				// console.log('-----------------donner recu-------------',response.data)
 				for (let obj of response.data) {
@@ -74,6 +76,7 @@ const DetailsExercice = (props) => {
 					});
 					val6.push(obj);
 				}
+				//console.log('-----------------donner recu-------------',val6)
 				setexercises(val);
 				setAllExecises(val6);
 			})
@@ -90,6 +93,7 @@ const DetailsExercice = (props) => {
 				for (let obj of response.data) {
 					val5.push(obj);
 				}
+				//console.log('-----------------donner recu-------------',val5)
 				setborrowing(val5);
 			})
 			.catch((error) => {
@@ -99,12 +103,13 @@ const DetailsExercice = (props) => {
 		//borrowings/
 		var val8 = [];
 		axiosNoTokenInstance
-			.get("/refunds")
+			.get("/refunds/")
 			.then((response) => {
 				// console.log('donner recu refunds', response.data)
 				for (let obj of response.data) {
 					val8.push(obj);
 				}
+				//console.log('-----------------donner recu-------------',val8)
 				setrefund(val8);
 			})
 			.catch((error) => {
@@ -114,11 +119,12 @@ const DetailsExercice = (props) => {
 		var tempo = [];
 
 		axiosNoTokenInstance
-			.get("/sessions_")
+			.get("/sessions_/")
 			.then((response) => {
 				for (let obj of response.data) {
 					tempo.push(obj);
 				}
+				//console.log('-----------------donner recu-------------',tempo)
 				setsessionsElt(tempo);
 			})
 			.catch((error) => {
@@ -142,9 +148,10 @@ const DetailsExercice = (props) => {
 		sessionsElt.forEach((item) => {
 			i = 0;
 			for (let obj of val2) {
-				if (obj.exercice.url === item["exercise_id"]) {
+				if (obj.exercice.id === item["exercise_id"]) {
 					obj.sessions.push(item);
-					val3[i].sessions = getUniqueListBy(obj.sessions, "url");
+					val3[i].sessions = getUniqueListBy(obj.sessions, "id");
+				//	console.log('-----------------donner recu-------------',val3)
 					setexercises(val3);
 				}
 				i = i + 1;
@@ -167,19 +174,21 @@ const DetailsExercice = (props) => {
       */
 
 	useEffect(() => {
-		setemail(props.Email);
-		setpassword(props.password);
-	}, [props]);
+		//console.log("^^^^^^^^^^^^^^^",auth.user.email)
+		setemail(auth.user.email);
+		setpassword(auth.user.password);
+	}, [auth]);
 
 	//requete vers l'API pour avoir le user correspondant
 	useEffect(() => {
 		axiosNoTokenInstance
-			.get("/users")
+			.get("/users/")
 			.then((response) => {
 				var val = [];
 				// console.log('donner recu',response.data)
 				for (let obj of response.data) {
 					if (password === obj.password && email === obj.email) {
+						//console.log('-----------------donner recu-------------',obj)
 						setuser(obj);
 					}
 				}
@@ -192,11 +201,13 @@ const DetailsExercice = (props) => {
 	//requete pour avoir le username de l'utilisateur correspondant
 	useEffect(() => {
 		axiosNoTokenInstance
-			.get("/members")
+			.get("/members/")
 			.then((response) => {
-				//console.log('userr infos',user['url'])
+				//console.log('userr infos',user['id'])
 				for (let temp of response.data) {
-					if (temp["user_id"] === user["url"]) {
+					console.log('response',temp['user_id'])
+					if (temp["user_id"] === user["id"]) {
+						//console.log('-----------------donner recu-------------',temp)
 						setmember(temp);
 					}
 				}
@@ -209,18 +220,18 @@ const DetailsExercice = (props) => {
 	const getEpargne = (sessionParam) => {
 		//var uniqueLis
 
-		// console.log('sessionParam',saving)
-		// console.log('member.url',member.url)
+		 console.log('sessionParam',saving)
+		// console.log('member.url',member.id)
 		var epargne = 0;
 		for (let obj4 of saving) {
 			for (let obj of sessionParam) {
-				if (obj.url == obj4["session_id"] && obj4["member_id"] == member.url) {
+				if (obj.id === obj4["session_id"] && obj4["member_id"] === member.id) {
 					//   console.log('jsuis la',obj4)
 					epargne = epargne + obj4["amount"];
 				}
 			}
 		}
-		// console.log('voici les epargnes', epargne)
+		 console.log('voici les epargnes', epargne)
 		return epargne;
 	};
 
@@ -229,7 +240,7 @@ const DetailsExercice = (props) => {
 		//console.log('borrowing',borrowing)
 		for (let obj4 of borrowing) {
 			for (let obj of sessionParam) {
-				if (obj.url === obj4["session_id"] && obj4["member_id"] === member.url) {
+				if (obj.id === obj4["session_id"] && obj4["member_id"] === member.id) {
 					borrow = borrow + obj4["amount"];
 				}
 			}
@@ -242,7 +253,7 @@ const DetailsExercice = (props) => {
 		//console.log('borrowing',borrowing)
 		for (let obj4 of borrowing) {
 			for (let obj of sessionParam) {
-				if (obj.url === obj4["session_id"] && obj4["member_id"] === member.url) {
+				if (obj.id === obj4["session_id"] && obj4["member_id"] === member.id) {
 					interest = interest + (obj4["amount"] * obj4["interest"]) / 100;
 				}
 			}
@@ -257,13 +268,13 @@ const DetailsExercice = (props) => {
 		for (let obj4 of refund) {
 			//  console.log('refund',obj4)
 			for (let obj of borrowing) {
-				if (obj["url"] == obj4["borrowing_id"]) {
+				if (obj["id"] == obj4["borrowing_id"]) {
 					tempo = obj;
 				}
 			}
 
 			for (let obj2 of sessionParam) {
-				if (obj2.url === obj4["session_id"] && tempo["member_id"] === member.url) {
+				if (obj2.id === obj4["session_id"] && tempo["member_id"] === member.id) {
 					refundAmount = refundAmount + obj4["amount"];
 					console.log("refundAmount", refundAmount);
 				}
@@ -407,6 +418,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+		marginTop:Dimensions.get('window').height * 0.02,
 		backgroundColor: "white",
 	},
 	dropDownItem: {

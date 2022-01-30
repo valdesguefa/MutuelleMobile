@@ -25,14 +25,14 @@ const NameComponent = (props) => {
 
 
     useEffect(() => {
-        getNameMember = () => {
+        const getNameMember = () => {
             var name = ''
             // this.setState({name: ''})
             for (let obj1 of members) {
 
-                if (item.member_id === obj1.url) {
+                if (item.member_id === obj1.id) {
 
-                    axios.get(obj1.user_id, headerObj).then((response) => {
+                    axios.get(URL+`/users/${obj1.user_id}/`, headerObj).then((response) => {
                         name = response.data['name'] + " " + response.data['first_name']
                         //  console.log('name',name)
                         setmember(name)// }, () => console.log('entrer', this.state.member))
@@ -51,7 +51,7 @@ const NameComponent = (props) => {
 
     return (
 
-        <Text numberOfLines={2} style={styles.text}>Concerne : {member}</Text>
+        <Text numberOfLines={2} style={styles.text}>Concerne : <Text style={styles.textResult}>{member}</Text></Text>
 
     )
 
@@ -90,7 +90,7 @@ export default class CarouselHelp extends Component {
     getContribution(item) {
         var contribution = 0
         for (let obj of this.state.contributions) {
-            if (obj.help_id === item.url && obj.state === 1) {
+            if (obj.help_id === item.id && obj.state === 1) {
                 contribution = contribution + item.unit_amount
             }
         }
@@ -100,7 +100,8 @@ export default class CarouselHelp extends Component {
     async loadFonts() {
         await Font.loadAsync({
             poppinsBold: require('../../assets/fonts/poppins-bold.ttf'),
-
+            poppinsMedium: require("../../assets/fonts/Poppins-Medium.otf"),
+            PoppinsLight: require("../../assets/fonts/Poppins-Light.otf"),
         });
         this.setState({ fontsLoaded: true });
     }
@@ -156,19 +157,22 @@ export default class CarouselHelp extends Component {
             console.log("voici l'erreur", error)
         })
     }
-
+/*
     getNameMember(item) {
 
         var val = ''
         // this.setState({name: ''})
+      //  console.log('voici les membres______________________-',this.state.members)
+      console.log('voici les membres______________________-',item)
         for (let obj1 of this.state.members) {
 
-            if (item.member_id === obj1.url) {
+            if (item.member_id === obj1.id) {
                 var name = ''
-                axios.get(obj1.user_id, headerObj).then((response) => {
+                console.log("***************************************",obj1.user_id)
+                axios.get(URL+`/users/${obj1.user_id}/`, headerObj).then((response) => {
                     name = response.data['name'] + " " + response.data['first_name']
 
-                    console.log('name------', name)
+                   // console.log('name------', name)
                     val = name
                     return name;
                 }).catch(error => console.log(error))
@@ -179,12 +183,12 @@ export default class CarouselHelp extends Component {
         return 'lll' + val;
 
     }
-
+*/
     getHelpTypeName(item) {
         var help_type = ''
         for (let obj3 of this.state.helpType) {
 
-            if (item.help_type_id === obj3.url) {
+            if (item.help_type_id === obj3.id) {
                 help_type = obj3.title
                 //objtempo1 = { ...objtempo, 'help_type_name': help_type }
                 // console.log('objtempo', objtempo1)
@@ -219,24 +223,24 @@ export default class CarouselHelp extends Component {
                 }}
 
             >
-                <Text style={styles.text}>Montant : {item.amount}</Text>
-                <Text style={styles.text}>Contribution : {item.unit_amount} XAF / membre</Text>
+                <Text style={styles.text}>Montant : <Text style={styles.textResult}>{item.amount}</Text></Text>
+                <Text style={styles.text}>Contribution : <Text style={styles.textResult}>{item.unit_amount} XAF / membre</Text></Text>
                 {
-                    item.state === 1 ? <View style={{ backgroundColor: 'white', height: 1, width: 240, marginBottom: 12,marginLeft: 20, }}></View>
+                    item.state === 1 ? <View style={{ backgroundColor: 'white', height: 1, width: 240, marginBottom: 12, marginLeft: 20, }}></View>
                         : <View style={{ backgroundColor: 'transparent', height: 40, width: 440 }}></View>
                 }
                 {
-                    item.state === 1 ? <Text style={styles.text}>Contribution : {this.getContribution(item)}</Text>
+                    item.state === 1 ? <Text style={styles.text}>Contribution : <Text style={styles.textResult}>{this.getContribution(item)}</Text></Text>
                         : null
                 }
 
                 <NameComponent members={this.state.members} item={item} />
-                <Text numberOfLines={2} style={styles.text}>Titre : {this.getHelpTypeName(item)}</Text>
-                <View  style= {{marginBottom : 10}}  >
-                <Animatable.View animation="bounceIn" duration={4500} >
-                    <Button label="Details" labelIcon='eye' style={{ marginRight: '10',color:'white'}} loading={false} />
-                </Animatable.View >
-            </View>
+                <Text numberOfLines={2} style={styles.text}>Titre : <Text style={styles.textResult}>{this.getHelpTypeName(item)}</Text></Text>
+                <View style={{ marginBottom: 10 }}  >
+                    <Animatable.View animation="bounceIn" duration={4500} >
+                        <Button label="Details" labelIcon='eye' style={{ marginRight: '10', color: 'white' }} loading={false} />
+                    </Animatable.View >
+                </View>
             </View >
         )
     }
@@ -309,8 +313,13 @@ const styles = StyleSheet.create({
         fontFamily: 'poppinsBold',
         paddingBottom: 1,
         paddingTop: 3,
-        fontSize: 16,
+        fontSize: 18,
         left: 2,
-        marginLeft: 20
+        marginLeft: 10
+    },
+    textResult: {
+        fontFamily: "PoppinsMedium",
+        fontSize: 17,
+        color:'white'
     }
 });
