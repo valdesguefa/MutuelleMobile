@@ -7,6 +7,7 @@ import * as Font from "expo-font";
 import headerObj from "../../shared/token";
 import { Dimensions, ScrollView } from "react-native";
 import { Avatar } from "react-native-elements";
+import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
 
 const HelpDetails = (props) => {
 	const [member, setmember] = useState("");
@@ -23,7 +24,8 @@ const HelpDetails = (props) => {
 	const [length, setlength] = useState(0);
 
 	useEffect(() => {
-		setitem(props.item);
+		console.log("props.route.params.item", props.route.params)
+		setitem(props.route.params);
 	}, [props]);
 
 	useEffect(() => {
@@ -208,42 +210,42 @@ const HelpDetails = (props) => {
 	}, []);
 
 	/*
-    useEffect(() => {
-        const loadFonts=async()=>{
-            await Font.loadAsync({
-                poppinsBold: require('../../assets/fonts/poppins-bold.ttf'),
+	useEffect(() => {
+		const loadFonts=async()=>{
+			await Font.loadAsync({
+				poppinsBold: require('../../assets/fonts/poppins-bold.ttf'),
     
-            });
-            setfontsLoaded(true)
-        }
-        loadFonts()
-     
-     const AsyncFunction=async()=>{
-    const response1= await  axiosNoTokenInstance.get(URL + `users/`, headerObj)
-    const tab=await response1.data
-    var val5=[]
-      for (let obj of tab) {
+			});
+			setfontsLoaded(true)
+		}
+		loadFonts()
+	 
+	 const AsyncFunction=async()=>{
+	const response1= await  axiosNoTokenInstance.get(URL + `users/`, headerObj)
+	const tab=await response1.data
+	var val5=[]
+	  for (let obj of tab) {
     
-                    val5.push(obj)
-                }
-                 
-                setusers(val5 )
+					val5.push(obj)
+				}
+				 
+				setusers(val5 )
     
-     const response2= await axiosNoTokenInstance.get(URL + `members/`, headerObj)
-     const tab2=await  response2.data
-    var val4=[]
-      for (let obj of tab2) {
+	 const response2= await axiosNoTokenInstance.get(URL + `members/`, headerObj)
+	 const tab2=await  response2.data
+	var val4=[]
+	  for (let obj of tab2) {
     
-                    val4.push(obj)
-                }
-                 
-              setmembers(val4 )
-              console.log('voici les membres',members)
-     }
-     AsyncFunction()
+					val4.push(obj)
+				}
+				 
+			  setmembers(val4 )
+			  console.log('voici les membres',members)
+	 }
+	 AsyncFunction()
     
-    }, [])
-    */
+	}, [])
+	*/
 
 	const getHelpTypeName = () => {
 		var help_type = "";
@@ -258,7 +260,7 @@ const HelpDetails = (props) => {
 	};
 
 	if (fontsLoaded) {
-		console.log("memberContribute ------------------------------------------------", memberContribute);
+		//console.log("memberContribute ------------------------------------------------", memberContribute);
 		// console.log('memberNoContribute ------------------------------------------------', memberNoContribute)
 		return (
 			<View style={{ backgroundColor: "white" }}>

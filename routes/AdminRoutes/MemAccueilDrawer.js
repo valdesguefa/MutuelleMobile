@@ -17,6 +17,7 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import axiosInstance from "../../utils/axiosInstance";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext } from "react";
+import HelpStack from "../HelpStack";
 
 function getHeaderTitle(route) {
 	// If the focused route is not found, we need to assume it's the initial screen
@@ -129,6 +130,7 @@ export default function MemAccueilDrawer() {
 				name="AccueilTab"
 				component={AccueilTab}
 				options={({ route, navigation }) => ({
+
 					headerTitle: getHeaderTitle(route),
 					headerLeft: () => (
 						<Icon
@@ -148,7 +150,9 @@ export default function MemAccueilDrawer() {
 			<Drawer.Screen name="Session" component={Session} />
 			<Drawer.Screen name="Exercices" component={Exercices} />
 			{/* <Drawer.Screen name="Dettes" component={Dettes} /> */}
-			<Drawer.Screen name="Aides" component={Aides} />
+			<Drawer.Screen name="Aides" options={{
+				headerShown: false
+			  }} component={HelpStack} />
 			<Drawer.Screen name="Deconnexion" component={Deconnexion} />
 		</Drawer.Navigator>
 	);

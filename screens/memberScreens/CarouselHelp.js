@@ -237,8 +237,8 @@ export default class CarouselHelp extends Component {
                 <NameComponent members={this.state.members} item={item} />
                 <Text numberOfLines={2} style={styles.text}>Titre : <Text style={styles.textResult}>{this.getHelpTypeName(item)}</Text></Text>
                 <View style={{ marginBottom: 10 }}  >
-                    <Animatable.View animation="bounceIn" duration={4500} >
-                        <Button label="Details" labelIcon='eye' style={{ marginRight: '10', color: 'white' }} loading={false} />
+                    <Animatable.View animation="bounceIn" duration={4500}  >
+                        <Button label="Details" onPress={()=>this.props.navigation.navigate('helpDetail',item)} labelIcon='eye' style={{ marginRight: '10', color: 'white' }} loading={false} />
                     </Animatable.View >
                 </View>
             </View >
