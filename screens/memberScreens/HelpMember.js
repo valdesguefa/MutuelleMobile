@@ -8,7 +8,7 @@ import * as Font from "expo-font";
 import { Dimensions } from 'react-native';
 
 
-const HelpMember = () => {
+const HelpMember = ({navigation}) => {
     const [activeHelp, setactiveHelp] = useState([])
     const [NoactiveHelp, setNoactiveHelp] = useState([])
     const [members, setmembers] = useState([])
@@ -149,10 +149,10 @@ const HelpMember = () => {
             <View style={{alignItems:'center',marginTop:Dimensions.get('window').height * 0.01,}}>
                 <ScrollView >
                     <Text numberOfLines={2} style={styles.text}>Aides financiaires auxquelles contribuer</Text>
-                    <CarouselHelp helpList={activeHelp} />
+                    <CarouselHelp helpList={activeHelp} navigation={navigation} />
 
                     <Text numberOfLines={2} style={styles.text}>Aides financiaires totalement contribuées</Text>
-                    <CarouselHelp helpList={NoactiveHelp} />
+                    <CarouselHelp helpList={NoactiveHelp} navigation={navigation} />
 
                 </ScrollView>
             </View>
