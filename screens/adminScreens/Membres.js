@@ -3,7 +3,17 @@ import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { Button, TextInput, HelperText } from "react-native-paper";
 
-import { View, Text, Modal, TouchableWithoutFeedback, Keyboard, ScrollView, FlatList, Alert } from "react-native";
+import {
+	View,
+	Text,
+	Modal,
+	TouchableWithoutFeedback,
+	Keyboard,
+	ScrollView,
+	FlatList,
+	Alert,
+	TouchableOpacity,
+} from "react-native";
 import { Avatar, Icon, ListItem } from "react-native-elements";
 import FlatButton from "../../shared/button";
 import { globalStyles } from "../../styles/global";
@@ -30,18 +40,13 @@ const memberCreateSchema = yup.object({
 	motDePasseR: yup.string().oneOf([yup.ref("motDePasse"), null], "les mot de passes ne correspond pas"),
 });
 
-export default function Membres() {
+export default function Membres({ navigation }) {
 	const { users, userDispatch } = useContext(UserContext);
 	const [loading, setLoading] = useState(false);
 	const { members, memberDispatch } = useContext(MemberContext);
-	const [modalOpen, setModalOpen] = useState(false);
-
-	useEffect(() => {
-		const membersGotten = users.filter((user) => user.type == "member");
-		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersGotten });
-	}, []);
-
 	const { auth, dispatch } = useContext(AuthContext);
+	const [modalOpen, setModalOpen] = useState(false);
+	const [permissions, setPermissions] = useState(auth.permissions);
 
 	const handleCreateMember = async (name, first_name, tel, email, address, password) => {
 		// dispatch({ type: "LOADING" });
@@ -59,7 +64,7 @@ export default function Membres() {
 		});
 		try {
 			const res = await axiosNoTokenInstance.post("/auth/register", body);
-			console.log("RESULT:", res.data.user);
+			// console.log("RESULT:", res.data.user);
 			memberDispatch({
 				type: "ADD_MEMBER",
 				payload: res.data.user,
@@ -76,6 +81,10 @@ export default function Membres() {
 					text: "OKAY",
 				},
 			]);
+			const resp = await axiosNoTokenInstance.post("/members/", {
+				administrator_id: auth.myAdminId,
+				user_id: res.data.user.id,
+			});
 		} catch (err) {
 			// dispatch({ type: "LOADED" });
 			console.log(err.response.data);
@@ -218,57 +227,21 @@ export default function Membres() {
 						data={members}
 						keyExtractor={(member, index) => index.toString()}
 						renderItem={({ item }) => (
-							<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
-								<Avatar
-									rounded
-									icon={{
-										name: "user",
-										type: "simple-line-icon",
-										color: "red",
-									}}
-								/>
-								<ListItem.Content>
-									<ListItem.Title>{`${item.first_name} ${item.name}`}</ListItem.Title>
-									<ListItem.Subtitle>{item.address}</ListItem.Subtitle>
-								</ListItem.Content>
-								<Icon
-									name="delete"
-									type="antdesign"
-									color="red"
-									onPress={() =>
-										Alert.alert("WARNING!!", "This member would be deleted", [
-											{
-												text: "DELETE",
-												onPress: async () => {
-													try {
-														const res = await axiosNoTokenInstance.delete(`/users/${item.id}/`);
-														memberDispatch({
-															type: "DELETE_MEMBER",
-															id: item.id,
-														});
-														userDispatch({
-															type: "DELETE_USER",
-															id: item.id,
-														});
-
-														Alert.alert("SUCCESS", "Member was deleted", [
-															{
-																text: "OKAY",
-															},
-														]);
-													} catch (err) {
-														console.log(err);
-													}
-												},
-											},
-
-											{
-												text: "CANCEL",
-											},
-										])
-									}
-								/>
-							</ListItem>
+							<TouchableOpacity onPress={() => navigation.navigate("Details du membre", item)}>
+								<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
+									<Avatar size={35} rounded source={{ uri: item.avatar }} />
+									<ListItem.Content>
+										<ListItem.Title>{`${item.first_name} ${item.name}`}</ListItem.Title>
+										<ListItem.Subtitle>{item.address}</ListItem.Subtitle>
+									</ListItem.Content>
+									<Icon
+										name="arrow-forward-ios"
+										type="material"
+										// disabled={permissions ? false : true}
+										color="#ff751a"
+									/>
+								</ListItem>
+							</TouchableOpacity>
 						)}
 					/>
 				) : (
@@ -278,7 +251,8 @@ export default function Membres() {
 				<Icon
 					name="add-circle"
 					size={70}
-					color="#f4511e"
+					disabled={permissions ? false : true}
+					color={permissions ? "#f4511e" : "#bbb"}
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 					onPress={() => setModalOpen(true)}
 				/>

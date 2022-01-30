@@ -11,6 +11,8 @@ import * as yup from "yup";
 
 import { Formik } from "formik";
 import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
+import { AuthContext } from "../../contexts/AuthContext";
+import { TouchableOpacity } from "react-native";
 
 const adminCreateSchema = yup.object({
 	nom: yup.string().required("un nom est requis"),
@@ -29,15 +31,18 @@ const adminCreateSchema = yup.object({
 	motDePasseR: yup.string().oneOf([yup.ref("motDePasse"), null], "les mot de passes ne correspond pas"),
 });
 
-export default function Administrateurs() {
+export default function Administrateurs({ navigation }) {
 	// const { administrators } = useContext(AdministratorContext);
 	const [modalOpen, setModalOpen] = useState(false);
 	const { users, userDispatch } = useContext(UserContext);
+	const { auth, dispatch } = useContext(AuthContext);
 	const { admins, adminDispatch } = useContext(AdministratorContext);
 	const [loading, setLoading] = useState(false);
+	const [permissions, setPermissions] = useState(auth.permissions);
+
 	useEffect(() => {
 		const adminsGotten = users.filter((user) => user.type == "administrator");
-		console.log("ADMINS:", adminsGotten);
+		// console.log("ADMINS:", adminsGotten);
 		adminDispatch({
 			type: "INITIALIZE_ADMINISTRATORS",
 			payload: adminsGotten,
@@ -77,6 +82,12 @@ export default function Administrateurs() {
 					text: "OKAY",
 				},
 			]);
+			const res2 = await axiosNoTokenInstance.post("/administrators/", { user_id: res.data.user.id });
+			// dispatch({
+			// 	type: "UPDATE_AUTH",
+			// 	prop: "administrator",
+			// 	payload: res2.data,
+			// });
 		} catch (err) {
 			// dispatch({ type: "LOADED" });
 			console.log(err);
@@ -221,58 +232,31 @@ export default function Administrateurs() {
 					data={admins}
 					keyExtractor={(admin, index) => index.toString()}
 					renderItem={({ item }) => (
-						<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
-							<Avatar rounded icon={{ name: "user", type: "simple-line-icon", color: "red" }} />
-							<ListItem.Content>
-								<ListItem.Title>{`${item.first_name} ${item.name}`}</ListItem.Title>
-								<ListItem.Subtitle>{item.email}</ListItem.Subtitle>
-							</ListItem.Content>
-							<Icon
-								name="delete"
-								type="antdesign"
-								color="red"
-								onPress={() =>
-									Alert.alert("WARNING!!", "This administrator would be deleted", [
-										{
-											text: "DELETE",
-											onPress: async () => {
-												try {
-													const res = await axiosNoTokenInstance.delete(`/users/${item.id}/`);
-													adminDispatch({
-														type: "DELETE_ADMIN",
-														id: item.id,
-													});
-													userDispatch({
-														type: "DELETE_USER",
-														id: item.id,
-													});
-
-													Alert.alert("SUCCESS", "Admin was deleted", [
-														{
-															text: "OKAY",
-														},
-													]);
-												} catch (err) {
-													console.log(err);
-												}
-											},
-										},
-
-										{
-											text: "CANCEL",
-										},
-									])
-								}
-							/>
-						</ListItem>
+						<TouchableOpacity onPress={() => navigation.navigate("Details de l'admin", item)}>
+							<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
+								<Avatar size={35} rounded source={{ uri: item.avatar }} />
+								<ListItem.Content>
+									<ListItem.Title>{`${item.first_name} ${item.name}`}</ListItem.Title>
+									<ListItem.Subtitle>{item.email}</ListItem.Subtitle>
+								</ListItem.Content>
+								<Icon
+									name="arrow-forward-ios"
+									type="material"
+									// disabled={permissions ? false : true}
+									color="#ff751a"
+								/>
+							</ListItem>
+						</TouchableOpacity>
 					)}
 				/>
 				<Icon
 					name="add-circle"
 					size={70}
-					color="#f4511e"
+					color={permissions ? "#f4511e" : "#bbb"}
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 					onPress={() => setModalOpen(true)}
+					disabled={permissions ? false : true}
+					// disabledStyle={{ color: "#bbb" }}
 				/>
 			</View>
 		</TouchableWithoutFeedback>
