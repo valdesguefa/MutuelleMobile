@@ -225,6 +225,7 @@ function BorrowingMember() {
 						return (
 							<Animated.View
 								style={{
+									
 									transform: [{ scale: scale }, { translateX: Offset }],
 									opacity: opacity,
 								}}
@@ -263,6 +264,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: "center",
+		
 	},
 	surface: {
 		height: height * 0.13,

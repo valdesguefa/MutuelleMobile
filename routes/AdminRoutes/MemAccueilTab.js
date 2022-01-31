@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Accueil from "../../screens/memberScreens/Accueil";
 import Epargnes from "../../screens/memberScreens/Epargnes";
 import Remboursements from "../../screens/memberScreens/Remboursements";
-import Emprunts from "../../screens/memberScreens/Emprunts";
+import Contributions from "../../screens/memberScreens/Contributions";
 import { Icon } from "react-native-elements";
 const Tab = createBottomTabNavigator();
 
@@ -20,7 +20,7 @@ export default function AccueilTab() {
 						iconName = focused ? "vertical-align-bottom" : "vertical-align-bottom";
 					} else if (route.name === "Remboursements") {
 						iconName = focused ? "rotate-left" : "rotate-left";
-					} else if (route.name === "Emprunts") {
+					} else if (route.name === "Contributions") {
 						iconName = focused ? "vertical-align-top" : "vertical-align-top";
 					}
 
@@ -35,7 +35,7 @@ export default function AccueilTab() {
 			<Tab.Screen name="Accueil" component={Accueil} />
 			<Tab.Screen name="Epargnes" component={Epargnes} />
 			<Tab.Screen name="Remboursements" component={Remboursements} />
-			<Tab.Screen name="Emprunts" component={Emprunts} />
+			<Tab.Screen name="Contributions" component={Contributions} />
 		</Tab.Navigator>
 	);
 }

@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { DrawerItem, createDrawerNavigator, DrawerContentScrollView } from "@react-navigation/drawer";
 import Administrateurs from "../../screens/memberScreens/AdminList";
-import TypeDaides from "../../screens/memberScreens/HelpType";
+import HelpType from "../../screens/memberScreens/HelpType";
 // import Configurations from "../../screens/memberScreens/Configurations";
 import Session from "../../screens/memberScreens/DetailsSession";
 import Exercices from "../../screens/memberScreens/DetailsExercice";
@@ -33,8 +33,8 @@ function getHeaderTitle(route) {
 			return "Epargnes";
 		case "Remboursements":
 			return "Remboursements";
-		case "Emprunts":
-			return "Emprunts";
+		case "Contributions":
+			return "Contributions";
 	}
 }
 
@@ -85,7 +85,7 @@ function CustomDrawerContent(props) {
 			<DrawerItem
 				label="Type D'aides"
 				icon={() => <Icon name="live-help" />}
-				onPress={() => props.navigation.navigate("Aides")}
+				onPress={() => props.navigation.navigate("TypeDaides")}
 			/>
 			{/* <DrawerItem
 				label="Configuration"
@@ -171,7 +171,7 @@ export default function MemAccueilDrawer() {
 			/>
 			<Drawer.Screen name="Membres" component={Membres} />
 			<Drawer.Screen name="Administrateurs" component={Administrateurs} />
-			<Drawer.Screen name="TypeDaides" component={TypeDaides} />
+			<Drawer.Screen name="TypeDaides" component={HelpType} />
 			{/* <Drawer.Screen name="Configurations" component={Configurations} /> */}
 			<Drawer.Screen name="Session" component={Session} />
 			<Drawer.Screen name="Exercices" component={Exercices} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Text, View, StyleSheet, Animated, Dimensions } from "react-native";
 import { Avatar, Surface } from "react-native-paper";
 
@@ -7,8 +7,10 @@ import * as Font from 'expo-font';
 import URL from '../../shared/URL';
 import axios from 'axios';
 import headerObj from '../../shared/token';
+import { AuthContext } from "../../contexts/AuthContext";
+// const { auth, dispatch } = useContext(AuthContext);
 
-function Epargnes(props) {
+function Epargnes() {
 
     const [saving, setsaving] = useState([]);
     const [fontsLoaded, setfontsLoaded] = useState(false);
@@ -26,6 +28,7 @@ function Epargnes(props) {
     const [members, setmembers] = useState([]);
     const [inter, setinter] = useState('');
     const [inter2, setinter2] = useState(0);
+    const { auth, dispatch } = useContext(AuthContext);
 
     const scrollY = React.useRef(new Animated.Value(0)).current;
 
@@ -43,7 +46,7 @@ function Epargnes(props) {
         loadFonts();
 
         var epargn = []
-        axios.get(URL + `saving/`, headerObj).then((response) => {
+        axios.get(URL + `savings/`, headerObj).then((response) => {
             // console.log('donner recu',response.data)
             for (let obj of response.data) {
                 epargn.push(obj)
@@ -55,7 +58,7 @@ function Epargnes(props) {
 
         var tempo = []
 
-        axios.get(URL + `sessions/`, headerObj).then((response) => {
+        axios.get(URL + `sessions_/`, headerObj).then((response) => {
             for (let obj of response.data) {
                 tempo.push(obj)
             }
@@ -103,15 +106,16 @@ function Epargnes(props) {
 
     //recuperation du password et email
     useEffect(() => {
-        setemail(props.Email)
-        setPassword(props.password)
-    }, [props.Email, props.password])
+		//console.log("^^^^^^^^^^^^^^^",auth.user.email)
+		setemail(auth.user.email);
+		setPassword(auth.user.password);
+	}, [auth]);
 
     useEffect(() => {
         axios.get(URL + `members/`, headerObj).then((response) => {
             // console.log('userr infos-----------------------',users)
             for (let temp of response.data) {
-                if (temp['user_id'] === user['url']) {
+                if (temp['user_id'] === user['id']) {
                     // console.log('--------------voici le membre-------------', temp)
                     setmember(temp)
                 }
@@ -130,7 +134,7 @@ function Epargnes(props) {
         var userId = ''
         for (let obj1 of members) {
 
-            if (membeId === obj1.url) {
+            if (membeId === obj1.id) {
                 /*
                                 axios.get(obj1.user_id, headerObj).then((response) => {
                                     obj.name = response.data['name'] + " " + response.data['first_name']
@@ -140,7 +144,7 @@ function Epargnes(props) {
                 */
                 userId = obj1['user_id']
                 for (let obj2 of users) {
-                    if (userId === obj2['url']) {
+                    if (userId === obj2['id']) {
                         name = obj2['name'] + " " + obj2['first_name']
                     }
                 }
@@ -159,7 +163,7 @@ function Epargnes(props) {
     const getDateSession = (sessionId) => {
         var resp = ''
         for (let obj of sessionsElt) {
-            if (sessionId === obj['url']) {
+            if (sessionId === obj['id']) {
                 resp = obj['date']
                 //  console.log('************************obj*********************', obj['date'])
             }
@@ -178,12 +182,12 @@ function Epargnes(props) {
         }]
         for (let obj of saving) {
 
-            if (obj['member_id'] == member['url']) {
+            if (obj['member_id'] == member['id']) {
                 objet.push({
                     amount: obj['amount'],
                     administrator: getNameMember(obj['administrator_id']),
                     session: getDateSession(obj['session_id']),
-                    id:obj['url']
+                    id:obj['id']
                 })
 
             }
@@ -192,7 +196,7 @@ function Epargnes(props) {
         setElementDisplay(objet)
 
 
-    }, [sessionsElt, users, members, member['url'], user]);
+    }, [sessionsElt, users, members, member['id'], user]);
 /*
     useEffect(() => {
         console.log('getDateSession*************************', ElementDisplay)
@@ -243,6 +247,7 @@ function Epargnes(props) {
                         return (
                             <Animated.View
                                 style={{
+                                    alignSelf:'center',
                                     transform: [{ scale: scale }, { translateX: Offset }],
                                     opacity: opacity,
                                 }}
@@ -278,10 +283,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     surface: {
-        height: height * 0.29,
+        height: 110,
         backgroundColor: '#FE7C00',
         width: Dimensions.get('window').width * 0.87,
         marginBottom:10,
+        marginTop:12,
         padding: 2,
         paddingLeft: 15,
         marginHorizontal: 10,
