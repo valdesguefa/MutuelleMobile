@@ -85,7 +85,7 @@ function CustomDrawerContent(props) {
 			<DrawerItem
 				label="Type D'aides"
 				icon={() => <Icon name="live-help" />}
-				onPress={() => props.navigation.navigate("Aides")}
+				onPress={() => props.navigation.navigate("TypeDaides")}
 			/>
 			{/* <DrawerItem
 				label="Configuration"

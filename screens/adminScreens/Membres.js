@@ -82,12 +82,14 @@ export default function Membres({ navigation }) {
 				},
 			]);
 			const resp = await axiosNoTokenInstance.post("/members/", {
-				administrator_id: auth.myAdminId,
+				administrator_id: auth.administrator_id,
 				user_id: res.data.user.id,
 			});
 		} catch (err) {
 			// dispatch({ type: "LOADED" });
+			console.log(err.message);
 			console.log(err.response.data);
+			console.log(err.response.status);
 			// Alert.alert("OOPS!", "A user with this credentials does not exist.", [
 			// 	{
 			// 		text: "Understood",

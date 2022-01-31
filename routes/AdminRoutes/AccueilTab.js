@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Accueil from "../../screens/adminScreens/Accueil";
-import Epargnes from "../../screens/memberScreens/Epargnes";
+import Epargnes from "../../screens/adminScreens/Epargnes";
 import Remboursements from "../../screens/adminScreens/Remboursements";
 import Emprunts from "../../screens/memberScreens/BorrowingMember";
 import { Icon } from "react-native-elements";
