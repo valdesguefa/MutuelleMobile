@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useContext } from 'react';
 import { Text, View, StyleSheet, Animated, Dimensions } from "react-native";
 import { Avatar, Surface } from "react-native-paper";
@@ -135,7 +136,7 @@ function Epargnes() {
         for (let obj1 of members) {
 
             if (membeId === obj1.id) {
-                /*
+  
                                 axios.get(obj1.user_id, headerObj).then((response) => {
                                     obj.name = response.data['name'] + " " + response.data['first_name']
                                     obj.avatar = response.data['avatar']
@@ -204,6 +205,7 @@ function Epargnes() {
 
     */
 
+ 
     if (fontsLoaded) {
         return (
             <View style={styles.container}>
@@ -278,6 +280,7 @@ function Epargnes() {
 export default Epargnes;
 
 const styles = StyleSheet.create({
+ 
     container: {
         flex: 1,
         justifyContent: "center",
@@ -294,5 +297,4 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         flexDirection: "column",
     },
-
 });

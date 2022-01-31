@@ -51,6 +51,13 @@ export const authReducer = (state, action) => {
 				...state,
 				loading: false,
 			};
+		case "UPDATE_AUTH":
+			//console.log("USER_LOADED_REDUCER");
+
+			return {
+				...state,
+				[action.prop]: action.payload,
+			};
 		case "USER_LOADED":
 			//console.log("USER_LOADED_REDUCER");
 
