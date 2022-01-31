@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
 	TouchableOpacity,
 	Image,
@@ -17,8 +17,9 @@ import Input from "./Input";
 import Button from "./Button";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
-import headerObj from "../../shared/token";
-import URL from "../../shared/URL";
+import headerObj from '../../shared/token';
+import { AuthContext } from "../../contexts/AuthContext";
+import URL from '../../shared/URL';
 //import RN from 'react-native';
 import * as ImagePicker from "expo-image-picker";
 //import { Icon } from 'react-native-vector-icons/icon';
@@ -28,7 +29,7 @@ import * as Animatable from "react-native-animatable";
 const EMAIL_REGEX =
 	/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export default function ProfilUpdate(props) {
+export default function ProfilUpdate() {
 	const [isBillingDifferent, setIsBillingDifferent] = useState(false);
 	// const { handleSubmit, control, errors } = useForm();
 	const [pickedImagePath, setPickedImagePath] = useState("");
@@ -56,16 +57,16 @@ export default function ProfilUpdate(props) {
 	const [user, setuser] = useState({});
 	const [member, setmember] = useState({});
 	const [users, setusers] = useState([]);
-
+	const { auth, dispatch } = useContext(AuthContext);
 	const [members, setmembers] = useState([]);
 	const [loadingSubmit, setloadingSubmit] = useState(false);
 
-	//recuperation du password et email
-	useEffect(() => {
-		setemail(props.Email);
-		setPassword(props.password);
-	}, [props.Email, props.password]);
-
+	  //recuperation du password et email
+	  useEffect(() => {
+		//console.log("^^^^^^^^^^^^^^^",auth.user.email)
+		setemail(auth.user.email);
+		setPassword(auth.user.password);
+	}, [auth]);
 	//requete vers l'API pour avoir le user correspondant
 	useEffect(() => {
 		axios
@@ -94,7 +95,7 @@ export default function ProfilUpdate(props) {
 				var val = [];
 				//console.log('userr infos',user['url'])
 				for (let temp of response.data) {
-					if (temp["user_id"] === user["url"]) {
+					if (temp["user_id"] === user["id"]) {
 						setmember(temp);
 					}
 					val.push(temp);
@@ -122,7 +123,7 @@ export default function ProfilUpdate(props) {
 	const AlreadyExist = (userApp) => {
 		//console.log('*********************userApp***************',userApp)
 		var bool = false;
-		var tab1 = users.filter((us) => us["url"] !== user["url"]);
+		var tab1 = users.filter((us) => us["id"] !== user["id"]);
 		console.log("................filtre des users..............", tab1);
 		var tab2 = members.filter((us) => us["username"] !== member["username"]);
 		console.log("................filtre des membres..............", tab2);
@@ -218,7 +219,7 @@ export default function ProfilUpdate(props) {
 					//  val2.append('administrator_id', member['administrator_id'])
 					axios
 						.patch(
-							member["url"],
+						URL+`members/${member["id"]}/`,
 							{
 								username: data["username"],
 								user_id: member["user_id"],
@@ -255,7 +256,7 @@ export default function ProfilUpdate(props) {
 						});
 					}
 					axios
-						.put(user["url"], val, headerObj)
+						.put(URL+`users/${user["id"]}/`, val, headerObj)
 						.then((response) => {
 							console.log("response1"); //,response)
 							setloadingSubmit(false);
@@ -273,7 +274,7 @@ export default function ProfilUpdate(props) {
 					//  val2.append('administrator_id', member['administrator_id'])
 					axios
 						.put(
-							member["url"],
+							URL+`members/${member["id"]}/`,
 							{
 								username: data["username"],
 								user_id: member["user_id"],
@@ -313,7 +314,7 @@ export default function ProfilUpdate(props) {
 						});
 					}
 					axios
-						.put(user["url"], val, headerObj)
+						.put(URL+`users/${user["id"]}/`, val, headerObj)
 						.then((response) => {
 							console.log("la modification des informations utilisateurs c'est bien passee"); //,response)
 							setloadingSubmit(false);
