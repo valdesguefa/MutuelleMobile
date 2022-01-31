@@ -168,8 +168,10 @@ const DetailsSession = () => {
                                 style={{
                                     transform: [{ scale: scale }, { translateX: Offset }],
                                     opacity: opacity,
+                                    
                                 }}
                                 key={`${item.sessionId.id}-${index}`}
+                                
                             >
                                 <Surface style={styles.surface}>
                                     <View><Text style={{ fontFamily: 'poppinsBold', fontSize: 16,color:'blue' }}>{index + 1}  Session du {item.sessionId['date']}</Text></View>
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
 		alignSelf:'center'
     },
     surface: {
-        height: height * 0.27,
+        height: 110,
         backgroundColor: '#FE7C00',
         width: Dimensions.get('window').width * 0.85,
         marginBottom: 10,

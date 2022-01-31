@@ -1,15 +1,16 @@
 import React, { Component, useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import * as Animatable from "react-native-animatable";
 import URL from "../../shared/URL";
 import Button from "./Button";
 import * as Font from "expo-font";
 import headerObj from "../../shared/token";
 import { Dimensions, ScrollView } from "react-native";
-import { Avatar } from "react-native-elements";
+import { Avatar, Icon } from "react-native-elements";
 import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
+import left from '../../assets/icons8_left_24px.png'
 
-const HelpDetails = (props) => {
+const HelpDetails = ({ route, navigation }) => {
 	const [member, setmember] = useState("");
 	const [item, setitem] = useState({});
 	const [members, setmembers] = useState([]);
@@ -24,18 +25,18 @@ const HelpDetails = (props) => {
 	const [length, setlength] = useState(0);
 
 	useEffect(() => {
-		console.log("props.route.params.item", props.route.params)
-		setitem(props.route.params);
-	}, [props]);
+		console.log("props.route.params.item", route.params)
+		setitem(route.params);
+	}, [route]);
 
 	useEffect(() => {
 		const getNameMember = () => {
 			var name = "";
 			// this.setState({name: ''})
 			for (let obj1 of members) {
-				if (item.member_id === obj1.url) {
+				if (item.member_id === obj1.id) {
 					axiosNoTokenInstance
-						.get(obj1.user_id, headerObj)
+						.get(URL + `users/${obj1.user_id}/`, headerObj)
 						.then((response) => {
 							name = response.data["name"] + " " + response.data["first_name"];
 							//  console.log('name',name)
@@ -51,42 +52,42 @@ const HelpDetails = (props) => {
 
 		getNameMember();
 	}, [members, item]);
-
-	const getNameMember1 = (membeId) => {
-		var obj = { name: "", avatar: "" };
-
-		// this.setState({name: ''})
-		// console.log('-----------member----------',members)
-		for (let obj1 of members) {
-			if (membeId == obj1.url) {
-				axiosNoTokenInstance
-					.get(obj1.user_id, headerObj)
-					.then((response) => {
-						obj.name = response.data["name"] + " " + response.data["first_name"];
-						obj.avatar = response.data["avatar"];
-						// console.log('************************obj*********************', obj)
-					})
-					.catch((error) => console.log(error));
-
-				//  break
+	/*
+		const getNameMember1 = (membeId) => {
+			var obj = { name: "", avatar: "" };
+	
+			// this.setState({name: ''})
+			// console.log('-----------member----------',members)
+			for (let obj1 of members) {
+				if (membeId == obj1.url) {
+					axiosNoTokenInstance
+						.get(obj1.user_id, headerObj)
+						.then((response) => {
+							obj.name = response.data["name"] + " " + response.data["first_name"];
+							obj.avatar = response.data["avatar"];
+							// console.log('************************obj*********************', obj)
+						})
+						.catch((error) => console.log(error));
+	
+					//  break
+				}
 			}
-		}
-
-		return obj;
-	};
-
+	
+			return obj;
+		};
+	*/
 	useEffect(() => {
 		var contributer = [];
 		var nocontributer = [];
 		for (let obj2 of contributions) {
-			if (obj2.help_id === item.url) {
+			if (obj2.help_id === item.id) {
 				if (obj2.state === 0) {
 					for (let obj1 of members) {
 						// var obj = { name: '', avatar: '' }
-						if (obj2["member_id"] === obj1.url) {
+						if (obj2["member_id"] === obj1.id) {
 							var obj = { name: "", avatar: "" };
 							axiosNoTokenInstance
-								.get(obj1.user_id, headerObj)
+								.get(URL + `users/${obj1.user_id}/`, headerObj)
 								.then((response) => {
 									//  obj.name = response.data['name'] + " " + response.data['first_name']
 									//  obj.avatar = response.data['avatar']
@@ -106,17 +107,19 @@ const HelpDetails = (props) => {
 					//setmemberContribute(contributer)
 				} else {
 					for (let obj1 of members) {
-						if (obj2["member_id"] === obj1.url) {
+						if (obj2["member_id"] === obj1.id) {
 							var obj3 = { name: "", avatar: "" };
 							axiosNoTokenInstance
-								.get(obj1.user_id, headerObj)
+								.get(URL + `users/${obj1.user_id}/`, headerObj)
 								.then((response) => {
 									obj3 = {
 										name: response.data["name"] + " " + response.data["first_name"],
 										avatar: response.data["avatar"],
 									};
-									// console.log('************************obj3*********************',obj3)
+
 									nocontributer.push(obj3);
+									//setmemberNoContribute(nocontributer);
+									 console.log('************************obj3*********************', nocontributer)
 									if (nocontributer.length >= memberNoContribute.length) {
 										setmemberNoContribute(nocontributer);
 									}
@@ -135,7 +138,7 @@ const HelpDetails = (props) => {
 	const getContribution = () => {
 		var contribu = 0;
 		for (let obj of contributions) {
-			if (obj.help_id === item.url && obj.state === 1) {
+			if (obj.help_id === item.id && obj.state === 1) {
 				contribu = contribu + item.unit_amount;
 			}
 		}
@@ -250,7 +253,7 @@ const HelpDetails = (props) => {
 	const getHelpTypeName = () => {
 		var help_type = "";
 		for (let obj3 of helpType) {
-			if (item.help_type_id === obj3.url) {
+			if (item.help_type_id === obj3.id) {
 				help_type = obj3.title;
 				//objtempo1 = { ...objtempo, 'help_type_name': help_type }
 				// console.log('objtempo', objtempo1)
@@ -272,23 +275,28 @@ const HelpDetails = (props) => {
 							fontFamily: "poppinsMedium",
 							fontSize: 12,
 							alignSelf: "center",
-							marginTop: 40,
+							marginTop: Dimensions.get("window").height * 0.02,
 						}}
 					>
 						{item.create_at} - {item.limit_date}
 					</Text>
+					<View >
+						<Icon name="arrow-back" size={30} color="white" containerStyle={{ left: Dimensions.get("window").width * -0.43,height:25, marginTop: Dimensions.get("window").height * -0.01, }} onPress={()=>navigation.navigate('help')}/>
+				
+					</View>
 				</View>
 				<View style={styles.underheader}></View>
 				<View style={styles.underheader}></View>
 				<View style={styles.underheader}></View>
 				<View style={styles.underheader}></View>
 				<View style={styles.underheader}></View>
+
 				<View
 					style={{
 						borderBottomLeftRadius: 60,
 						borderBottomRightRadius: 90,
 						// borderTopLeftRadius: 13,
-						height: Dimensions.get("window").height * 0.83,
+						height: Dimensions.get("window").height * 0.80,
 						width: Dimensions.get("window").width,
 						backgroundColor: "white",
 						flex: 3,
@@ -297,7 +305,7 @@ const HelpDetails = (props) => {
 						borderTopRightRadius: 58,
 						borderBottomRightRadius: 60,
 						padding: 15,
-						top: 154,
+						top: Dimensions.get("window").height * 0.1759,
 						justifyContent: "center",
 					}}
 				>
@@ -305,9 +313,9 @@ const HelpDetails = (props) => {
 						animation="bounceIn"
 						duraton="4500"
 						style={{
-							marginTop: Dimensions.get("window").height * -0.09,
+							marginTop: Dimensions.get("window").height * -0.1,
 							marginLeft: Dimensions.get("window").width * 0.2,
-							marginBottom: 20,
+							marginBottom: 30,
 							shadowColor: "black",
 							shadowOpacity: 0.7,
 							shadowRadius: 20,
@@ -327,7 +335,7 @@ const HelpDetails = (props) => {
 						<Text numberOfLines={1} style={styles.nameMember}>
 							{member}
 						</Text>
-						<ScrollView horizontal={false} style={{ height: 40 }}>
+						<ScrollView horizontal={false} style={{ height: 80, alignSelf: 'center', width: Dimensions.get('window').width * 0.9, marginLeft: Dimensions.get('window').width * -0.18 }}>
 							<Text style={styles.comment}>{item.comments}</Text>
 						</ScrollView>
 					</Animatable.View>
@@ -364,14 +372,14 @@ const HelpDetails = (props) => {
 											duration={3000}
 											animation={"jello"}
 											easing={"ease-in"}
-											key={elt.name}
+											key={index}
 											style={{ margin: 5, marginTop: 10 }}
 										>
 											<Avatar
 												size={70}
 												rounded
 												source={elt.avatar ? { uri: elt.avatar } : { uri: "../../assets/icons8_male_user_120px.png" }}
-												key={`${elt.name}-12345`}
+												key={`${elt.name}-${index}`}
 											/>
 											<Text>{elt.name}</Text>
 										</Animatable.View>
@@ -381,18 +389,18 @@ const HelpDetails = (props) => {
 						</View>
 
 						<View>
-							<Text style={{ fontFamily: "poppinsMedium", fontSize: 14, fontStyle: "normal", marginTop: 10 }}>
+							<Text style={{ fontFamily: "poppinsMedium", fontSize: 14, fontStyle: "normal", marginTop: 15 }}>
 								Membres n'ayant pas contribue :
 							</Text>
-							<ScrollView horizontal={true}>
+							<ScrollView horizontal={true} style={{ width: Dimensions.get('window').width * 0.85 }}>
 								{memberNoContribute.map((elt, index) => {
 									return (
 										<Animatable.View
 											duration={3000}
 											animation={"jello"}
 											easing={"ease-in"}
-											key={elt.name}
-											style={{ margin: 5, marginTop: 10 }}
+											key={index}
+											style={{ margin: 5, marginTop: 15 }}
 										>
 											<Avatar
 												size={70}
@@ -413,7 +421,7 @@ const HelpDetails = (props) => {
 			</View>
 		);
 	} else {
-		return false;
+		return null;
 	}
 };
 
@@ -424,11 +432,11 @@ const styles = StyleSheet.create({
 		color: "gray",
 		fontStyle: "normal",
 		fontFamily: "poppinsMedium",
-		paddingBottom: 1,
+		alignSelf: 'center',
 		paddingTop: 3,
 		fontSize: 16,
+		marginLeft: Dimensions.get('window').width * -0.02,
 		left: 2,
-		marginLeft: 20,
 	},
 	contribution: {
 		color: "black",
@@ -467,21 +475,21 @@ const styles = StyleSheet.create({
 	},
 	header: {
 		backgroundColor: "#FE7C00",
-		height: Dimensions.get("window").height * 0.15,
+		height: Dimensions.get("window").height * 0.13,
 		width: Dimensions.get("window").width,
-		top: 25,
-		borderBottomLeftRadius: 58,
+		top: Dimensions.get("window").height * 0.022,
+		borderBottomLeftRadius: 46,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 		position: "relative",
 	},
 	underheader: {
 		backgroundColor: "#FE7C00",
-		height: Dimensions.get("window").height * 0.17,
+		height: Dimensions.get("window").height * 0.18,
 		width: Dimensions.get("window").width,
 		position: "relative",
 		justifyContent: "center",
-		top: 25,
+		top: Dimensions.get("window").height * 0.02,
 		bottom: 0,
 	},
 	footer: {
