@@ -1,4 +1,4 @@
-import { View, Button, Platform, Dimensions, StyleSheet, Text } from 'react-native';
+import { View, Platform, Dimensions, StyleSheet, Text } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from '@mdi/react'
 import { mdiAccount } from '@mdi/js'
@@ -9,7 +9,7 @@ import { TextInput } from "react-native-paper";
 import Input from "../screens/adminScreens/Input"
 import Constants from 'expo-constants';
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import * as Animatable from "react-native-animatable";
 
 // You can import from local files
@@ -18,9 +18,11 @@ import ModalDropdown from '@monchilin/react-native-dropdown';
 import headerObj from "../shared/token";
 import URL from "../shared/URL";
 import { AuthContext } from "../contexts/AuthContext";
+import Button from '../screens/adminScreens/Button';
 
 export const AddHelp = () => {
     const [date, setDate] = useState(new Date(1598051730000));
+    const [idHelp, setidHelp] = useState(0);
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
     const [helpTypeTitle, sethelpTypeTitle] = useState({});
@@ -113,6 +115,19 @@ export const AddHelp = () => {
 
 
     const handleSubmit = () => {
+        /*
+            console.log('kjhbkjhbk',{
+            help_type_id: helpTypeTitle.id,
+            amount: helpTypeTitle.amount,
+            limit_date: limitDate,
+            unit_amount: helpTypeTitle.amount / (members.length - 1),
+            comments: comment,
+            state: 1,
+            member_id: concern["id"],
+            administrator_id: auth.user.id,
+        })
+        */
+        console.log('admin inf', auth.user)
         axios
             .post(
                 URL + `helps/`,
@@ -124,12 +139,30 @@ export const AddHelp = () => {
                     comments: comment,
                     state: 1,
                     member_id: concern["id"],
-                    administrator_id: 1,
+                    administrator_id: 1
                 },
                 headerObj
             )
             .then((response) => {
-                console.log("voici l'aide enregistrer", response.data);
+
+                setidHelp(response.data.id)
+
+                for (let obj6 of members.filter(item => item.id !== concern["id"])) {
+                    console.log('admin inf', auth.user)
+                    axios
+                        .post(
+                            URL + `contributions/`,
+                            {
+                                help_id: idHelp,
+                                date: limitDate, comments: comment,
+                                state: 0,
+                                member_id: obj6['id'],
+                                administrator_id: 1
+                            },
+                            headerObj
+                        )
+                }
+            }).then((response1) => {
                 alert('ajout effectue avec succes')
             }).catch(error => {
                 console.log("voici l'erreur", error)
@@ -142,8 +175,10 @@ export const AddHelp = () => {
         const currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
         setDate(currentDate);
+        const date = new Date(`${currentDate}`)
+        // console.log('lsahldlakjsdlfkjal',date.toDateString())
         // console.log('klskdlskdljkjks',selectedDate)
-        setlimitDate(`${currentDate}`)
+        setlimitDate(`${date.toDateString()}`)
 
     };
 
