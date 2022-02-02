@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, Modal, StyleSheet, Text, View } from "react-native";
+import { Alert, Modal, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { Button, Card, Icon } from "react-native-elements";
 import { AuthContext } from "../../contexts/AuthContext";
 import { ConfigContext } from "../../contexts/configContext";
@@ -26,7 +26,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 // 		.test("isValidNumber", "annee invalid", (val) => parseInt(val) > 0),
 // });
 
-export default function Accueil() {
+export default function Accueil({ navigation }) {
 	const { auth, dispatch } = useContext(AuthContext);
 	const { members, memberDispatch } = useContext(MemberContext);
 	const { configs, configDispatch } = useContext(ConfigContext);
@@ -39,129 +39,130 @@ export default function Accueil() {
 	const { borrowings, borrowingDispatch } = useContext(BorrowingContext);
 	const [modalOpen, setModalOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [tresorie, setTresorie] = useState(0);
+	const [preState, setPreState] = useState("");
+	const [nextState, setNextState] = useState("");
+	const [loadingContent, setLoadingContent] = useState(true);
+	const [blurExoYear, setBlurExoYear] = useState(false);
+	const [changedSession, setChangedSession] = useState(false);
 
-	// eparges;
-	console.log("AUTH:", auth);
-	// console.log("EXERCISES:", exercises);
-	// console.log("USERS:", users);
+	console.log("REFUNDS:", refunds);
 
-	const currenDate = new Date();
+	console.log("SAVINGS:", savings);
+	console.log("BORROWINGS:", borrowings);
 
-	let prePhase;
-	let nextPhase;
+	const french = {
+		SAVING: "Epargnes",
+		REFUND: "Remboursements",
+		BORROWING: "Emprunts",
+	};
 
-	if (auth.state == "SAVING") {
-		prePhase == "";
-		nextPhase == "remboursements";
-	}
-	if (auth.state == "REFUND") {
-		prePhase == "epargnes";
-		nextPhase == "emprunts";
-	}
-	if (auth.state == "BORROWING") {
-		prePhase == "refunds";
-		nextPhase == "terminer";
-	}
-	if (auth.state == "END") {
-		prePhase == "";
-		nextPhase == "commencer";
-	}
+	const next = {
+		SAVING: "REFUND",
+		REFUND: "BORROWING",
+		BORROWING: "END",
+	};
+
+	const prev = {
+		REFUND: "SAVING",
+		BORROWING: "REFUND",
+	};
+	// console.log("AUTH FROM ACCUEIL:    ", auth);
+
+	useEffect(() => {
+		if (auth.current_state == "SAVING") {
+			setPreState("");
+			setNextState("remboursements");
+		} else if (auth.current_state == "REFUND") {
+			setPreState("epargnes");
+			setNextState("emprunts");
+		} else if (auth.current_state == "BORROWING") {
+			setPreState("remboursements");
+			setNextState("terminer");
+		} else if (auth.current_state == "END") {
+			setPreState("");
+			setNextState("commencer");
+		}
+	}, [auth.current_state]);
 
 	let membersWithCrown = members.filter((member) => member.social_crown == 1);
 	let part1 = members.length * configs.inscription_per_member;
 	let part2 = membersWithCrown.length * configs.social_funds_per_member;
 	let fondSocial = part1 + part2;
 
-	useEffect(() => {
+	let bors = 0;
+	let saves = 0;
+	let refs = 0;
+	if (savings.length > 0) {
 		savings.forEach((saving) => {
-			tresorie += saving.amount;
+			saves += saving.amount;
 		});
+	}
+	if (refunds.length > 0) {
 		refunds.forEach((refund) => {
-			tresorie += refund.amount;
+			refs += refund.amount;
 		});
+	}
+	if (borrowings.length > 0) {
 		borrowings.forEach((borrowing) => {
-			tresorie += borrowing.amount;
+			bors += borrowing.amount;
 		});
-	}, [savings, refunds, borrowings]);
+	}
+	let tresorie = saves + refs - bors;
+
+	// useEffect(() => {
+	// 	if (savings) setTresorie(tresorie + savings[savings.length - 1].amount);
+	// }, [savings]);
+
+	// useEffect(() => {
+	// 	if (refunds.length > 0) setTresorie(tresorie + refunds[refunds.length - 1].amount);
+	// }, [refunds]);
+
+	// useEffect(() => {
+	// 	if (borrowings.length > 0) setTresorie(tresorie - borrowings[borrowings.length - 1].amount);
+	// }, [borrowings]);
 
 	useEffect(() => {
-		const setPhaseState = async () => {
-			const result = await axiosNoTokenInstance.get("/sessions_");
-			console.log("SESSIONS:", result.data);
-			if (result.data.length > 0) {
-				const theSession = result.data[result.data.length - 1];
-				dispatch({
-					type: "UPDATE_AUTH",
-					payload: theSession.state,
-					prop: "state",
-				});
-			}
-		};
-
-		setPhaseState();
-
-		//set members to context
-		const membersGotten = users.filter((user) => user.type == "member");
-		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersGotten });
-		let membersToModify = membersGotten;
-		// Add to members info from members table
-		const addMoreToMembers = async () => {
-			for (let i = 1; i <= membersGotten.length; i++) {
-				let gottenObj = await axiosNoTokenInstance.get(`/members/${i}`);
-				gottenObj = gottenObj.data;
-				// console.log("GOTTENOBJ:", gottenObj);
-				membersToModify.forEach((member) => {
-					if (member.id == gottenObj.user_id) {
-						member.username = gottenObj.username;
-						member.social_crown = gottenObj.social_crown;
-						member.inscription = gottenObj.inscription;
-						member.administrator_id = gottenObj.administrator_id;
-					}
-				});
-			}
-			//Add to auth more info
-
-			// console.log("MEMBERSTOMODIFY:", membersToModify);
-			memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersToModify });
-		};
-
-		const addMoreToAuth = async () => {
-			let gottenObj = await axiosNoTokenInstance.get(`/administrators/${auth.user.id}`);
-			dispatch({
-				type: "UPDATE_AUTH",
-				prop: "administrator_id",
-				payload: gottenObj.data.id,
-			});
-		};
-
-		addMoreToAuth();
-
-		addMoreToMembers();
-
-		const loadAdmin = async () => {
+		const setCurrent = async () => {
 			try {
-				const res = await axiosNoTokenInstance.get("/administrators");
-				// console.log("RES:", res.data);
-				const theAdmin = res.data.filter((admin) => admin.user_id == auth.user.id);
+				const result = await axiosNoTokenInstance.get("/exercises/");
+				// console.log("SESSIONS:", result.data);
+				if (result.data.length > 0) {
+					const theExercise = result.data[result.data.length - 1];
+					dispatch({
+						type: "UPDATE_AUTH",
+						payload: theExercise.id,
+						prop: "current_exercise_id",
+					});
 
-				dispatch({
-					type: "UPDATE_AUTH",
-					payload: theAdmin[0].id,
-					prop: "administrator_id",
-				});
-				if (theAdmin[0].root == 1) {
 					dispatch({
 						type: "UPDATE_AUTH",
-						payload: true,
-						prop: "permissions",
+						payload: result.data.length,
+						prop: "current_exercise_no",
 					});
-				} else {
+
+					const result2 = await axiosNoTokenInstance.get("/sessions_/");
+					const theSession = result2.data[result2.data.length - 1];
+					// console.log("SESSION STATE:", theSession.state);
 					dispatch({
 						type: "UPDATE_AUTH",
-						payload: false,
-						prop: "permissions",
+						payload: theSession.state,
+						prop: "current_state",
 					});
+
+					dispatch({
+						type: "UPDATE_AUTH",
+						payload: theSession.id,
+						prop: "current_session_id",
+					});
+
+					const sessionWithCurId = result2.data.filter((session) => session.exercise_id == theExercise.id);
+
+					dispatch({
+						type: "UPDATE_AUTH",
+						payload: sessionWithCurId.length,
+						prop: "current_session_no",
+					});
+					setLoadingContent(false);
 				}
 			} catch (err) {
 				console.log(err.message);
@@ -169,31 +170,118 @@ export default function Accueil() {
 				console.log(err.response.status);
 			}
 		};
-		loadAdmin();
+
+		setCurrent();
+	}, [changedSession]);
+
+	useEffect(() => {
+		//set members to context
+		const membersGotten = users.filter((user) => user.type == "member");
+		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersGotten });
+		let membersToModify = membersGotten;
+		// Add to members info from members table
+
+		// console.log("MEMBERSTOMODIFY:", membersToModify);
+		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersToModify });
+
+		const addMoreToAuth = async () => {
+			try {
+				let fetchedAdministrators = await axiosNoTokenInstance.get(`/administrators/`);
+				fetchedAdministrators = fetchedAdministrators.data;
+				fetchedAdministrators.forEach((fetchedAdministrator) => {
+					let user_id = fetchedAdministrator.user_id;
+					if (auth.user.id == user_id) {
+						auth.user.administrator_id = fetchedAdministrator.id;
+						auth.user.root = fetchedAdministrator.root;
+						auth.user.username = fetchedAdministrator.username;
+						if (fetchedAdministrator.root == 1) {
+							auth.permissions = true;
+						} else {
+							auth.permissions = false;
+						}
+					}
+				});
+			} catch (err) {
+				console.log(err.message);
+				console.log(err.response.data);
+				console.log(err.response.status);
+			}
+		};
+
+		addMoreToAuth();
 	}, []);
 
-	const handleCreateExercise = async (annee, value) => {
-		try {
-			const res = await axiosNoTokenInstance.post("/exercises/", {
-				year: currenDate.getFullYear(),
-				administrator_id: auth.administrator_id,
-			});
-			// console.log("RESULT:", res.data.user);
-			exerciseDispatch({
-				type: "ADD_EXERCISE",
-				payload: res.data,
-			});
-			dispatch({
-				type: "UPDATE_AUTH",
-				payload: res.data.id,
-				prop: "exercise_id",
-			});
+	useEffect(() => {
+		const addMoreToMembers = async () => {
+			try {
+				let membersFetched = await axiosNoTokenInstance.get(`/members/`);
+				membersFetched = membersFetched.data;
+				membersFetched.forEach((fetchedMember) => {
+					let user_id = fetchedMember.user_id;
+					members.forEach((member) => {
+						if (member.id == user_id) {
+							member.username = fetchedMember.username;
+							member.social_crown = fetchedMember.social_crown;
+							member.inscription = fetchedMember.inscription;
+							member.administrator_id = fetchedMember.administrator_id;
+						}
+					});
+				});
+			} catch (err) {
+				console.log(err.message);
+				console.log(err.response.data);
+				console.log(err.response.status);
+			}
+		};
 
-			const res2 = await axiosNoTokenInstance.post("/sessions_/", {
-				exercise_id: res.data.id,
-				administrator_id: auth.administrator_id,
-				state: "SAVING",
-			});
+		addMoreToMembers();
+	}, [members]);
+
+	const [date, setDate] = useState(new Date());
+	const [annee, setAnnee] = useState(new Date());
+
+	const handleCreateExercise = async () => {
+		try {
+			let res;
+			if (!blurExoYear) {
+				res = await axiosNoTokenInstance.post("/exercises/", {
+					year: annee.getFullYear(),
+					administrator_id: auth.user.administrator_id,
+					create_at: date,
+				});
+				exerciseDispatch({
+					type: "ADD_EXERCISE",
+					payload: res.data,
+				});
+				dispatch({
+					type: "UPDATE_AUTH",
+					payload: res.data.id,
+					prop: "current_exercise_id",
+				});
+				dispatch({
+					type: "UPDATE_AUTH",
+					payload: exercises.length++,
+					prop: "current_exercise_no",
+				});
+			}
+			let res2;
+			if (auth.current_session_no < 10) {
+				res2 = await axiosNoTokenInstance.post("/sessions_/", {
+					exercise_id: auth.current_exercise_id,
+					administrator_id: auth.user.administrator_id,
+					state: "SAVING",
+					create_at: date,
+					date: date,
+				});
+			} else {
+				res2 = await axiosNoTokenInstance.post("/sessions_/", {
+					exercise_id: res.data.id,
+					administrator_id: auth.user.administrator_id,
+					state: "SAVING",
+					create_at: date,
+					date: date,
+				});
+			}
 
 			sessionDispatch({
 				type: "ADD_SESSION",
@@ -202,13 +290,30 @@ export default function Accueil() {
 			dispatch({
 				type: "UPDATE_AUTH",
 				payload: res2.data.id,
-				prop: "session_id",
+				prop: "current_session_id",
 			});
 			dispatch({
 				type: "UPDATE_AUTH",
 				payload: res2.data.state,
-				prop: "state",
+				prop: "current_state",
 			});
+			setChangedSession(!changedSession);
+			// console.log("SESSION NO:", res.data.user);
+
+			// if (auth.current_session_no < 10) {
+			// 	dispatch({
+			// 		type: "UPDATE_AUTH",
+			// 		payload: auth.current_session_no++,
+			// 		prop: "current_session_no",
+			// 	});
+			// } else {
+			// 	dispatch({
+			// 		type: "UPDATE_AUTH",
+			// 		payload: 1,
+			// 		prop: "current_session_no",
+			// 	});
+			// }
+
 			setLoading(false);
 			setModalOpen(false);
 			Alert.alert("SUCCESS", "Une nouvelle session et exercise vien de commencer", [
@@ -217,105 +322,136 @@ export default function Accueil() {
 				},
 			]);
 		} catch (err) {
-			console.log(err.response.data);
 			console.log(err.message);
 			console.log(err.response.data);
 			console.log(err.response.status);
 		}
 	};
 
-	const [date, setDate] = useState(new Date());
-	const [mode, setMode] = useState("date");
-	const [show, setShow] = useState(false);
-	console.log("DATE:", date.toDateString());
+	const [showAnneeDP, setShowAnneeDP] = useState(false);
+	const [showDateDP, setShowDateDP] = useState(false);
+	// console.log("DATE:", date.toDateString());
 
-	const onChange = (event, selectedDate) => {
+	const onDateChange = (event, selectedDate) => {
 		const currentDate = selectedDate || date;
-		setShow(Platform.OS === "ios");
+		setShowDateDP(Platform.OS === "ios");
 		setDate(currentDate);
 	};
 
-	const showMode = (currentMode) => {
-		setShow(true);
-		setMode(currentMode);
+	const onAnneeChange = (event, selectedDate) => {
+		const currentDate = selectedDate || date;
+		setShowAnneeDP(Platform.OS === "ios");
+		setAnnee(currentDate);
 	};
 
-	const showDatepicker = () => {
-		showMode("date");
+	const handleCurrentState = () => {
+		navigation.navigate(french[auth.current_state]);
 	};
 
-	const showTimepicker = () => {
-		showMode("time");
+	const handleNextState = () => {
+		if ((auth.current_state == "SAVING") | (auth.current_state == "REFUND")) {
+			Alert.alert("ATTENTION!!", `Êtes-vous sûr(e) de vouloir passer aux ${french[next[auth.current_state]]}`, [
+				{
+					text: "OUI",
+					onPress: async () => {
+						try {
+							const res = await axiosNoTokenInstance.patch(`/sessions_/${auth.current_session_id}/`, {
+								state: next[auth.current_state],
+							});
+							dispatch({
+								type: "UPDATE_AUTH",
+								payload: res.data.state,
+								prop: "current_state",
+							});
+						} catch (err) {
+							console.log(err.message);
+							console.log(err.response.data);
+							console.log(err.response.status);
+						}
+					},
+				},
+
+				{
+					text: "ANNULER",
+				},
+			]);
+		} else if (auth.current_state == "BORROWING") {
+			Alert.alert(
+				"ATTENTION!!",
+				`Êtes-vous sûr(e) de vouloir cloturer la session? Vous ne pourrez plus faire aucun enregistrerment.`,
+				[
+					{
+						text: "OUI",
+						onPress: async () => {
+							try {
+								const res = await axiosNoTokenInstance.patch(`/sessions_/${auth.current_session_id}/`, {
+									state: next[auth.current_state],
+								});
+								dispatch({
+									type: "UPDATE_AUTH",
+									payload: res.data.state,
+									prop: "current_state",
+								});
+							} catch (err) {
+								console.log(err.message);
+								console.log(err.response.data);
+								console.log(err.response.status);
+							}
+						},
+					},
+
+					{
+						text: "ANNULER",
+					},
+				]
+			);
+		} else {
+			console.log("clicked");
+			setModalOpen(true);
+			if (auth.current_session_no == 10) {
+				setBlurExoYear(false);
+			} else {
+				setBlurExoYear(true);
+			}
+		}
 	};
 
-	return exercises.length ? (
-		<View style={globalStyles.container}>
-			<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
-				<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-					<Card.Title>Tresorie</Card.Title>
-					<Card.Divider />
-					<View style={{ alignItems: "center" }}>
-						<Text>{`${tresorie} XAF`}</Text>
-					</View>
-				</Card>
-				<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-					<Card.Title>Fond social</Card.Title>
-					<Card.Divider />
-					<View style={{ alignItems: "center" }}>
-						<Text>{`${fondSocial} XAF`}</Text>
-					</View>
-				</Card>
+	const handlePreviousState = () => {
+		Alert.alert("ATTENTION!!", `Êtes-vous sûr de vouloir revenir à la phase ${preState} ?`, [
+			{
+				text: "OUI",
+				onPress: async () => {
+					try {
+						const res = await axiosNoTokenInstance.patch(`/sessions_/${auth.current_session_id}/`, {
+							state: prev[auth.current_state],
+						});
+						dispatch({
+							type: "UPDATE_AUTH",
+							payload: res.data.state,
+							prop: "current_state",
+						});
+					} catch (err) {
+						console.log(err.message);
+						console.log(err.response.data);
+						console.log(err.response.status);
+					}
+				},
+			},
+
+			{
+				text: "ANNULER",
+			},
+		]);
+	};
+
+	if (loadingContent) {
+		return (
+			<View style={globalStyles.container}>
+				<ActivityIndicator size="large" color="#ff751a" />
 			</View>
-
-			<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
-				<Card.Title>PHASE ACTIVE</Card.Title>
-				<Card.Divider />
-				<View style={{ alignItems: "center" }}>
-					<Text style={{ marginBottom: 10 }}>{`PHASE DE ${auth.state}`}</Text>
-					<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-						<Button
-							title={`${prePhase}`}
-							buttonStyle={{
-								backgroundColor: "#ff751a",
-								borderColor: "transparent",
-								borderRadius: 5,
-							}}
-							onPress={() => {
-								handlePrePhase();
-							}}
-						/>
-						<Button
-							title={`${nextPhase}`}
-							buttonStyle={{
-								backgroundColor: "#ff751a",
-								borderColor: "transparent",
-								borderRadius: 5,
-							}}
-							onPress={() => {
-								handleNextPhase();
-							}}
-						/>
-					</View>
-				</View>
-			</Card>
-
-			<Card containerStyle={{ borderRadius: 10 }}>
-				<Card.Title>Evenements de la mutuelle</Card.Title>
-				<Card.Divider />
-				{/* <View style={{ alignItems: "center" }}>
-					{helps.length && <Text style={{ marginBottom: 10 }}>Aucune aide active</Text>}
-					<Button
-						title={helps.lenght ? "Consulter les aides disponible" : ""}
-						buttonStyle={{
-							backgroundColor: "#ff751a",
-							borderColor: "transparent",
-							borderRadius: 5,
-						}}
-					/>
-				</View> */}
-			</Card>
-		</View>
-	) : (
+		);
+	}
+	return (
 		<View style={globalStyles.container}>
 			<Modal visible={modalOpen} animationType="slide">
 				<View style={globalStyles.container}>
@@ -323,11 +459,11 @@ export default function Accueil() {
 					<Formik
 						// validationSchema={helpTypeCreateSchema}
 						initialValues={{
-							annee: currenDate.getFullYear().toString(),
-							date: currenDate.toDateString(),
+							annee: annee.getFullYear().toString(),
+							date: date.toDateString(),
 						}}
 						onSubmit={(values) => {
-							handleCreateExercise(values.annee, values.date);
+							handleCreateExercise();
 							// handlePress();
 						}}
 					>
@@ -352,28 +488,71 @@ export default function Accueil() {
 										mode="outlined"
 										disabled
 										style={{ flex: 3, marginRight: 20 }}
-										value={props.values.annee}
+										value={annee.getFullYear().toString()}
 										theme={{ colors: { disabled: "#ff751a" } }}
 									/>
-									<Icon name="calendar" size={50} type="foundation" color="#ff751a" onPress={showDatepicker} />
+									<Icon
+										name="calendar"
+										size={50}
+										type="foundation"
+										color="#ff751a"
+										onPress={() => setShowAnneeDP(true)}
+									/>
 								</View>
+
 								<HelperText type="error" visible={true}></HelperText>
+
+								{blurExoYear ? (
+									<></>
+								) : (
+									showAnneeDP && (
+										<DateTimePicker
+											testID="dateTimePicker"
+											value={annee}
+											mode="date"
+											is24Hour={true}
+											display="default"
+											onChange={onAnneeChange}
+										/>
+									)
+								)}
 
 								<View style={{ flexDirection: "row", alignItems: "center" }}>
 									<TextInput
-										label="Date de la rencontre de la premiere session"
+										label="Date date de début de la session"
 										mode="outlined"
 										disabled
 										style={{ flex: 3, marginRight: 20 }}
-										value={props.values.date}
+										value={date.toDateString()}
 										theme={{ colors: { disabled: "#ff751a" } }}
 									/>
-									<Icon name="calendar" size={50} type="foundation" color="#ff751a" onPress={showDatepicker} />
+									<Icon
+										name="calendar"
+										size={50}
+										type="foundation"
+										color="#ff751a"
+										onPress={() => setShowDateDP(true)}
+									/>
 								</View>
 								<HelperText type="error" visible={true}></HelperText>
-
+								{showDateDP && (
+									<DateTimePicker
+										testID="dateTimePicker"
+										value={date}
+										mode="date"
+										is24Hour={true}
+										display="default"
+										onChange={onDateChange}
+									/>
+								)}
 								<FlatButton
-									text={loading ? "loading..." : "Commencer premiere exercice"}
+									text={
+										loading
+											? "loading..."
+											: blurExoYear
+											? "Commencer une nouvelle session"
+											: "Commencer une nouvelle exercice"
+									}
 									onPress={() => {
 										setLoading(true);
 										props.handleSubmit();
@@ -385,57 +564,177 @@ export default function Accueil() {
 					</Formik>
 				</View>
 			</Modal>
-			<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
-				<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-					<Card.Title>Tresorie</Card.Title>
-					<Card.Divider />
-					<View style={{ alignItems: "center" }}>
-						<Text>{`${tresorie} XAF`}</Text>
+			{exercises.length ? (
+				<View>
+					<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
+						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+							<Card.Title>Tresorie</Card.Title>
+							<Card.Divider />
+							<View style={{ alignItems: "center" }}>
+								<Text>{`${tresorie} XAF`}</Text>
+							</View>
+						</Card>
+						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+							<Card.Title>Fond social</Card.Title>
+							<Card.Divider />
+							<View style={{ alignItems: "center" }}>
+								<Text>{`${fondSocial} XAF`}</Text>
+							</View>
+						</Card>
 					</View>
-				</Card>
-				<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-					<Card.Title>Fond social</Card.Title>
-					<Card.Divider />
-					<View style={{ alignItems: "center" }}>
-						<Text>{`${fondSocial} XAF`}</Text>
-					</View>
-				</Card>
-			</View>
 
-			<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
-				<Card.Title>Exrcice</Card.Title>
-				<Card.Divider />
-				<View style={{ alignItems: "center" }}>
-					<Text style={{ marginBottom: 10 }}>Aucun exercice en activite</Text>
+					<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
+						{auth.current_state != "END" && <Card.Title>{`PHASE ${french[auth.current_state]}`}</Card.Title>}
+						{auth.current_state != "END" && (
+							<Button
+								title={`Faire les ${french[auth.current_state]}`}
+								buttonStyle={{
+									backgroundColor: "#ff751a",
+									borderColor: "transparent",
+									borderRadius: 5,
+								}}
+								raised
+								// icon={{
+								// 	name: "next",
+								// 	type: "foundation",
+								// 	size: 15,
+								// 	color: "white",
+								// }}
+								iconRight
+								onPress={() => {
+									handleCurrentState();
+								}}
+							/>
+						)}
+						<Card.Divider />
+						<View style={{ alignItems: "center", justifyContent: "center" }}>
+							<View>
+								<Button
+									title={
+										nextState != "terminer"
+											? auth.current_state == "END"
+												? `${nextState} session`
+												: `passer aux ${nextState}`
+											: `${nextState} session`
+									}
+									buttonStyle={{
+										backgroundColor: "#ff751a",
+										borderColor: "transparent",
+										borderRadius: 5,
+									}}
+									raised
+									icon={{
+										name: "next",
+										type: "foundation",
+										size: 15,
+										color: "white",
+									}}
+									iconRight
+									onPress={() => {
+										handleNextState();
+									}}
+								/>
+								{preState != "" && (
+									<Button
+										raised
+										title={`rentourner aux ${preState}`}
+										buttonStyle={{
+											backgroundColor: "#ff751a",
+											borderColor: "transparent",
+											borderRadius: 5,
+										}}
+										containerStyle={{ marginVertical: 20 }}
+										icon={{
+											name: "previous",
+											type: "foundation",
+											size: 15,
+											color: "white",
+										}}
+										iconLeft
+										onPress={() => {
+											handlePreviousState();
+										}}
+									/>
+								)}
+							</View>
+						</View>
+						<Card.Divider />
+						{auth.current_state != "END" && (
+							<Card.Title>{`SESSION ${auth.current_session_no} de DE L'EXERCICE ${auth.current_exercise_no}`}</Card.Title>
+						)}
+					</Card>
+
+					<Card containerStyle={{ borderRadius: 10 }}>
+						<Card.Title>Evenements de la mutuelle</Card.Title>
+
+						{/* <View style={{ alignItems: "center" }}>
+					{helps.length && <Text style={{ marginBottom: 10 }}>Aucune aide active</Text>}
 					<Button
-						title="COMMENCER UN NOUVEL EXERCICE"
+						title={helps.lenght ? "Consulter les aides disponible" : ""}
 						buttonStyle={{
 							backgroundColor: "#ff751a",
 							borderColor: "transparent",
 							borderRadius: 5,
 						}}
-						onPress={() => {
-							setModalOpen(true);
-						}}
 					/>
+				</View> */}
+					</Card>
 				</View>
-			</Card>
+			) : (
+				<View>
+					<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
+						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+							<Card.Title>Tresorie</Card.Title>
+							<Card.Divider />
+							<View style={{ alignItems: "center" }}>
+								<Text>{`${tresorie} XAF`}</Text>
+							</View>
+						</Card>
+						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+							<Card.Title>Fond social</Card.Title>
+							<Card.Divider />
+							<View style={{ alignItems: "center" }}>
+								<Text>{`${fondSocial} XAF`}</Text>
+							</View>
+						</Card>
+					</View>
 
-			<Card containerStyle={{ borderRadius: 10 }}>
-				<Card.Title>Evenements de la mutuelle</Card.Title>
-				<Card.Divider />
-				<View style={{ alignItems: "center" }}>
-					<Text style={{ marginBottom: 10 }}>Aucune aide active</Text>
-					<Button
-						title="CREER UNE NOUVELLE AIDE"
-						buttonStyle={{
-							backgroundColor: "#ff751a",
-							borderColor: "transparent",
-							borderRadius: 5,
-						}}
-					/>
+					<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
+						<Card.Title>Exrcice</Card.Title>
+						<Card.Divider />
+						<View style={{ alignItems: "center" }}>
+							<Text style={{ marginBottom: 10 }}>Aucun exercice en activite</Text>
+							<Button
+								title="COMMENCER UN NOUVEL EXERCICE"
+								buttonStyle={{
+									backgroundColor: "#ff751a",
+									borderColor: "transparent",
+									borderRadius: 5,
+								}}
+								onPress={() => {
+									setModalOpen(true);
+								}}
+							/>
+						</View>
+					</Card>
+
+					<Card containerStyle={{ borderRadius: 10 }}>
+						<Card.Title>Evenements de la mutuelle</Card.Title>
+						<Card.Divider />
+						<View style={{ alignItems: "center" }}>
+							<Text style={{ marginBottom: 10 }}>Aucune aide active</Text>
+							<Button
+								title="CREER UNE NOUVELLE AIDE"
+								buttonStyle={{
+									backgroundColor: "#ff751a",
+									borderColor: "transparent",
+									borderRadius: 5,
+								}}
+							/>
+						</View>
+					</Card>
 				</View>
-			</Card>
+			)}
 		</View>
 	);
 }

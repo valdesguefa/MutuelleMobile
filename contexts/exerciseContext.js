@@ -9,7 +9,7 @@ const ExerciseContextProvider = (props) => {
 
 	useEffect(() => {
 		const getExercises = async () => {
-			const res = await axiosNoTokenInstance.get("/exercises");
+			const res = await axiosNoTokenInstance.get("/exercises/");
 			exerciseDispatch({ type: "INITIALIZE_EXERCISE", payload: res.data });
 		};
 

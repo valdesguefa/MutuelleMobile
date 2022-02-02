@@ -20,6 +20,7 @@ const MembreDetails = (props) => {
 	const email = props.route.params.email;
 	const avatar = props.route.params.avatar;
 	const tel = props.route.params.tel;
+	const id = props.route.params.id;
 	const address = props.route.params.address;
 	let created_at = new Date(props.route.params.create_at);
 	let date = new Date(props.route.params.create_at);
@@ -92,7 +93,8 @@ const MembreDetails = (props) => {
 				<Card.Divider />
 				<Button
 					disabled={permissions ? false : true}
-					color={permissions ? "red" : "#bbb"}
+					color="red"
+					// color={permissions ? "red" : "#bbb"}
 					title="Delete"
 					icon={{
 						name: "deleteuser",
@@ -102,7 +104,8 @@ const MembreDetails = (props) => {
 					}}
 					iconContainerStyle={{ marginRight: 5 }}
 					buttonStyle={{
-						backgroundColor: permissions ? "red" : "#bbb",
+						backgroundColor: "red",
+						// backgroundColor: permissions ? "red" : "#bbb",
 						borderColor: "transparent",
 						borderWidth: 0,
 						borderRadius: 30,
@@ -119,16 +122,16 @@ const MembreDetails = (props) => {
 								text: "DELETE",
 								onPress: async () => {
 									try {
-										const res = await axiosNoTokenInstance.delete(`/users/${item.id}/`);
+										const res = await axiosNoTokenInstance.delete(`/users/${id}/`);
 										memberDispatch({
 											type: "DELETE_MEMBER",
-											id: item.id,
+											id: id,
 										});
 										userDispatch({
 											type: "DELETE_USER",
-											id: item.id,
+											id: id,
 										});
-
+										props.navigation.goBack();
 										Alert.alert("SUCCESS", "Member was deleted", [
 											{
 												text: "OKAY",

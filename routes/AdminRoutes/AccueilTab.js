@@ -3,8 +3,11 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Accueil from "../../screens/adminScreens/Accueil";
 import Epargnes from "../../screens/adminScreens/Epargnes";
 import Remboursements from "../../screens/adminScreens/Remboursements";
-import Emprunts from "../../screens/memberScreens/BorrowingMember";
+import Emprunts from "../../screens/adminScreens/Emprunts";
 import { Icon } from "react-native-elements";
+import epargnesStack from "../epargnesStack";
+import empruntStack from "../empruntStack";
+import remboursementsStack from "../remboursementsStack";
 const Tab = createBottomTabNavigator();
 
 export default function MemAccueilTab() {
@@ -33,9 +36,9 @@ export default function MemAccueilTab() {
 			})}
 		>
 			<Tab.Screen name="Accueil" component={Accueil} />
-			<Tab.Screen name="Epargnes" component={Epargnes} />
-			<Tab.Screen name="Remboursements" component={Remboursements} />
-			<Tab.Screen name="Emprunts" component={Emprunts} />
+			<Tab.Screen name="Epargnes" component={epargnesStack} />
+			<Tab.Screen name="Remboursements" component={remboursementsStack} />
+			<Tab.Screen name="Emprunts" component={empruntStack} />
 		</Tab.Navigator>
 	);
 }

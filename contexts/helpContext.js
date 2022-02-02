@@ -9,7 +9,7 @@ const HelpContextProvider = (props) => {
 
 	useEffect(() => {
 		const getHelps = async () => {
-			const res = await axiosNoTokenInstance.get("/helps");
+			const res = await axiosNoTokenInstance.get("/helps/");
 			helpDispatch({ type: "INITIALIZE_HELP", payload: res.data });
 		};
 

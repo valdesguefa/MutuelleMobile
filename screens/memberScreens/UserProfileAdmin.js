@@ -12,7 +12,7 @@ import {
 	Text,
 	View,
 } from "react-native";
-import { Avatar, Icon } from "react-native-elements";
+import { Avatar, Button, Icon } from "react-native-elements";
 import * as Animatable from "react-native-animatable";
 import * as Font from "expo-font";
 import axios from "axios";
@@ -21,7 +21,7 @@ import URL from "../../shared/URL";
 import { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 
-export default function UserProfileAdmin(props) {
+export default function UserProfileAdmin({ navigation }) {
 	const [user, setuser] = useState({});
 	const [fontsLoaded, setfontsLoaded] = useState(false);
 	const [password, setPassword] = useState("");
@@ -94,7 +94,7 @@ export default function UserProfileAdmin(props) {
 	if (fontsLoaded) {
 		return (
 			<View>
-				<View style={styles.header}>
+				{/* <View style={styles.header}>
 					<ImageBackground
 						style={styles.headerBackgroundImage}
 						blurRadius={5}
@@ -119,6 +119,14 @@ export default function UserProfileAdmin(props) {
 								<View style={styles.userCityRow}>
 									<Text style={styles.userCityText}>{user["address"]}, Cameroun</Text>
 								</View>
+								<Button
+									title="Update profile"
+									buttonStyle={{
+										backgroundColor: "#ff751a",
+										borderRadius: 3,
+									}}
+									onPress={() => navigation.navigate("Profile update")}
+								/>
 							</View>
 						</View>
 					</ImageBackground>
@@ -163,7 +171,15 @@ export default function UserProfileAdmin(props) {
 							<Text style={{ fontSize: 16, color: "black" }}>Date d'inscription:</Text> {user.create_at}
 						</Text>
 					</View>
-				</Animatable.View>
+				</Animatable.View> */}
+				<Button
+					title="Update profile"
+					buttonStyle={{
+						backgroundColor: "#ff751a",
+						borderRadius: 3,
+					}}
+					onPress={() => navigation.navigate("Profile update")}
+				/>
 			</View>
 		);
 	} else {

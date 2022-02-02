@@ -9,7 +9,7 @@ const ConfigContextProvider = (props) => {
 
 	useEffect(() => {
 		const getConfigs = async () => {
-			const res = await axiosNoTokenInstance.get("/configs");
+			const res = await axiosNoTokenInstance.get("/configs/");
 			configDispatch({ type: "INITIALIZE_CONFIG", payload: res.data[0] });
 		};
 

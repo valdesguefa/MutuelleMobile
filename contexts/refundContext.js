@@ -9,7 +9,7 @@ const RefundContextProvider = (props) => {
 
 	useEffect(() => {
 		const getRefunds = async () => {
-			const res = await axiosNoTokenInstance.get("/refunds");
+			const res = await axiosNoTokenInstance.get("/refunds/");
 			refundDispatch({ type: "INITIALIZE_REFUND", payload: res.data });
 		};
 
