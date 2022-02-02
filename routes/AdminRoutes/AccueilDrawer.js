@@ -20,6 +20,9 @@ import { useContext } from "react";
 import { Alert } from "react-native";
 import MemberStack from "../memberStack";
 import AdminStack from "../adminStack";
+import HelpStack from "../HelpStack";
+import SessionStack from "../SessionStack";
+import AdminHelpStack from "../AdminHelpStack";
 
 function getHeaderTitle(route) {
 	// If the focused route is not found, we need to assume it's the initial screen
@@ -130,7 +133,7 @@ export default function AccueilDrawer() {
 					<Icon
 						iconStyle={{ marginLeft: 20 }}
 						size={40}
-						name="arrow-back"
+						name="menu"
 						color="white"
 						onPress={() => navigation.openDrawer()}
 					/>
@@ -173,10 +176,14 @@ export default function AccueilDrawer() {
 			<Drawer.Screen name="Administrateurs" component={AdminStack} />
 			<Drawer.Screen name="TypeDaides" component={TypeDaides} />
 			<Drawer.Screen name="Configurations" component={Configurations} />
-			<Drawer.Screen name="Session" component={Session} />
+			<Drawer.Screen name="Session" options={{
+					headerShown: false,
+				}} component={SessionStack} />
 			<Drawer.Screen name="Exercices" component={Exercices} />
 			<Drawer.Screen name="Dettes" component={Dettes} />
-			<Drawer.Screen name="Aides" component={Aides} />
+			<Drawer.Screen name="Aides" options={{
+					headerShown: false,
+				}} component={AdminHelpStack} />
 			<Drawer.Screen name="Deconnexion" component={Deconnexion} />
 		</Drawer.Navigator>
 	);

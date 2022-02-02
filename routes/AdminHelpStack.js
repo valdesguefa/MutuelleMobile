@@ -1,14 +1,17 @@
 
-import Header from "../shared/header";
 import * as React from "react";
-//import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HelpMember from "../screens/memberScreens/HelpMember";
+import HelpType from "../screens/memberScreens/HelpType";
 import HelpDetails from "../screens/memberScreens/HelpDetails";
+import Aides from "../screens/adminScreens/Aides";
+import Header from "../shared/header";
+import AddHelpStack from "./AddHelpStack";
 
 const Stack = createNativeStackNavigator();
 
-export default function HelpStack({navigation}) {
+export default function AdminHelpStack({navigation}) {
 	return (
 			<Stack.Navigator
 				initialRouteName="help"
@@ -20,14 +23,13 @@ export default function HelpStack({navigation}) {
 			>
 				<Stack.Screen
 					name="help"
-					component={HelpMember}
+					component={AddHelpStack}
 					options={{
-						headerShown: true,
-						headerTitle: () => <Header navigation={navigation} title="Aides" />,
+						headerShown: false,
+						headerTitle: () => <Header navigation={navigation} title="Mutuelle" />,
 						headerStyle: {
 							backgroundColor: "#f4511e",
 						},
-						
 					}}
 				/>
 				<Stack.Screen

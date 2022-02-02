@@ -8,7 +8,7 @@ import headerObj from "../../shared/token";
 import { Dimensions, ScrollView } from "react-native";
 import { Avatar, Icon } from "react-native-elements";
 import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
-import left from '../../assets/icons8_left_24px.png'
+// import left from '../../assets/icons8_left_24px.png'
 
 const HelpDetails = ({ route, navigation }) => {
 	const [member, setmember] = useState("");

@@ -187,7 +187,11 @@ export default function Contributions() {
         // console.log('adminId',adminId)
         for (let obj of admin) {
             if (obj['id'] === adminId) {
-                return getNameMember(obj['user_id'])
+                for(let ov of users){
+                    if(ov['id'] === obj['user_id']){
+                        return ov['name'] + " " + ov['first_name']
+                    }
+                }
             }
             else {
                 return ''
