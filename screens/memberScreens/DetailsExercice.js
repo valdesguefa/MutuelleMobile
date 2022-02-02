@@ -418,7 +418,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		marginTop:Dimensions.get('window').height * 0.02,
 		backgroundColor: "white",
 	},
 	dropDownItem: {

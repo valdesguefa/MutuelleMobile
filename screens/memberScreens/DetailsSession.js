@@ -174,7 +174,7 @@ const DetailsSession = () => {
                                 
                             >
                                 <Surface style={styles.surface}>
-                                    <View><Text style={{ fontFamily: 'poppinsBold', fontSize: 16,color:'blue' }}>{index + 1}  Session du {item.sessionId['date']}</Text></View>
+                                    <View><Text style={{ fontFamily: 'poppinsBold', fontSize: 16,color:'blue' }} numberOfLines={1}>{index + 1}  Session du {item.sessionId['date']}</Text></View>
                                     <View
 
                                     >

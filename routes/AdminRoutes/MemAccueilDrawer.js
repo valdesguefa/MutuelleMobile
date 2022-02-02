@@ -130,7 +130,7 @@ export default function MemAccueilDrawer() {
 					<Icon
 						iconStyle={{ marginLeft: 20 }}
 						size={40}
-						name="arrow-back"
+						name="menu"
 						color="white"
 						onPress={() => navigation.openDrawer()}
 					/>

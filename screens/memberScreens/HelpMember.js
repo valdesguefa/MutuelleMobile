@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, StatusBar } from "react-native";
 import headerObj from "../../shared/token";
 import URL from "../../shared/URL";
 import CarouselHelp from "./CarouselHelp";
@@ -146,7 +146,7 @@ const HelpMember = ({navigation}) => {
 */
     if (fontsLoaded) {
         return (
-            <View style={{alignItems:'center',marginTop:Dimensions.get('window').height * 0.05,}}>
+            <View style={{alignItems:'center'}}>
                 <ScrollView >
                     <Text numberOfLines={2} style={styles.text}>Aides financiaires auxquelles contribuer</Text>
                     <CarouselHelp helpList={activeHelp} navigation={navigation} />
