@@ -8,6 +8,7 @@ import * as Font from "expo-font";
 import { Dimensions } from 'react-native';
 import { AuthContext } from "../../contexts/AuthContext";
 import { Avatar, Icon, ListItem } from "react-native-elements";
+import AddHelpStack from "../../routes/AddHelpStack";
 
 const Aides = ({navigation}) => {
     const [activeHelp, setactiveHelp] = useState([])
@@ -149,7 +150,7 @@ const Aides = ({navigation}) => {
 */
     if (fontsLoaded) {
         return (
-            <View style={{alignItems:'center',marginTop:10,}}>
+            <View style={{alignItems:'center'}}>
                 <ScrollView >
                     <Text numberOfLines={2} style={styles.text}>Aides financiaires auxquelles contribuer</Text>
                     <CarouselHelp helpList={activeHelp} navigation={navigation} />
@@ -158,14 +159,16 @@ const Aides = ({navigation}) => {
                     <CarouselHelp helpList={NoactiveHelp} navigation={navigation} />
 
                 </ScrollView>
+                
                 <Icon
 					name="add-circle"
 					size={70}
-					disabled={permissions ? false : true}
-					color={permissions ? "#f4511e" : "#bbb"}
-					containerStyle={{ position: "absolute", bottom: 10,right: 10,backgroundColor:'transparent' }}
-					
+					color="#f4511e"
+					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
+					onPress={() => navigation.navigate('addHelp')}
 				/>
+                
+               
             </View>
         )
     }
