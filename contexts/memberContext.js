@@ -17,11 +17,7 @@ const MemberContextProvider = (props) => {
 	// 	getMembers();
 	// }, [members]);
 
-	return (
-		<MemberContext.Provider value={{ members, memberDispatch }}>
-			{props.children}
-		</MemberContext.Provider>
-	);
+	return <MemberContext.Provider value={{ members, memberDispatch }}>{props.children}</MemberContext.Provider>;
 };
 
 export default MemberContextProvider;

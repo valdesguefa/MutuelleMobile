@@ -20,6 +20,7 @@ import { useContext } from "react";
 import { Alert } from "react-native";
 import MemberStack from "../memberStack";
 import AdminStack from "../adminStack";
+import profileStack from "../profileStack";
 import HelpStack from "../HelpStack";
 import SessionStack from "../SessionStack";
 import AdminHelpStack from "../AdminHelpStack";
@@ -71,9 +72,23 @@ function CustomDrawerContent(props) {
 	return (
 		<DrawerContentScrollView {...props}>
 			<DrawerItem
+				inactiveBackgroundColor="#ccc"
 				label="BACK TO TABS"
 				icon={() => <Icon type="entypo" name="dots-three-horizontal" />}
 				onPress={() => props.navigation.navigate("AccueilTab")}
+			/>
+			<DrawerItem
+				label=""
+				icon={() => (
+					<Avatar
+						containerStyle={{ marginleft: 100 }}
+						size={50}
+						rounded
+						source={{ uri: auth.user.avatar }}
+						// onPress={() => }
+					/>
+				)}
+				onPress={() => props.navigation.navigate("Profile")}
 			/>
 
 			<DrawerItem
@@ -161,17 +176,12 @@ export default function AccueilDrawer() {
 							onPress={() => navigation.openDrawer()}
 						/>
 					),
-					headerRight: () => (
-						<Avatar
-							containerStyle={{ marginRight: 20 }}
-							size={50}
-							rounded
-							source={{ uri: auth.user.avatar }}
-							onPress={() => navigation.goBack()}
-						/>
-					),
+					// headerRight: () => (
+
+					// ),
 				})}
 			/>
+			<Drawer.Screen name="Profile" component={profileStack} />
 			<Drawer.Screen name="Membres" component={MemberStack} />
 			<Drawer.Screen name="Administrateurs" component={AdminStack} />
 			<Drawer.Screen name="TypeDaides" component={TypeDaides} />

@@ -1,15 +1,13 @@
-
 import Header from "../shared/header";
 import * as React from "react";
-//import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HelpMember from "../screens/memberScreens/HelpMember";
 import HelpDetails from "../screens/memberScreens/HelpDetails";
 
 const Stack = createNativeStackNavigator();
 
 export default function HelpStack({navigation}) {
 	return (
+ 
 			<Stack.Navigator
 				initialRouteName="help"
 				screenOptions={{

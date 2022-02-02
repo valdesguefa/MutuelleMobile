@@ -2,3 +2,7 @@ HANDLE ERRORSS
 console.log(err.message);
 console.log(err.response.data);
 console.log(err.response.status);
+
+Apres connection commme admin add the first admin to /administrators
+
+If error occures while adding a user in the post d'ont put him in context

@@ -9,7 +9,7 @@ const SavingContextProvider = (props) => {
 
 	useEffect(() => {
 		const getSavings = async () => {
-			const res = await axiosNoTokenInstance.get("/savings");
+			const res = await axiosNoTokenInstance.get("/savings/");
 			savingDispatch({ type: "INITIALIZE_SAVING", payload: res.data });
 		};
 

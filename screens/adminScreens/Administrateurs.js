@@ -38,7 +38,6 @@ export default function Administrateurs({ navigation }) {
 	const { auth, dispatch } = useContext(AuthContext);
 	const { admins, adminDispatch } = useContext(AdministratorContext);
 	const [loading, setLoading] = useState(false);
-	const [permissions, setPermissions] = useState(auth.permissions);
 
 	useEffect(() => {
 		const adminsGotten = users.filter((user) => user.type == "administrator");
@@ -252,11 +251,11 @@ export default function Administrateurs({ navigation }) {
 				<Icon
 					name="add-circle"
 					size={70}
-					color={permissions ? "#f4511e" : "#bbb"}
+					color="#f4511e"
+					// color={auth.permissions ? "#f4511e" : "#bbb"}
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 					onPress={() => setModalOpen(true)}
-					disabled={permissions ? false : true}
-					// disabledStyle={{ color: "#bbb" }}
+					// disabled={auth.permissions ? false : true}
 				/>
 			</View>
 		</TouchableWithoutFeedback>

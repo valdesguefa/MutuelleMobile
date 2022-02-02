@@ -9,7 +9,7 @@ const BorrowingContextProvider = (props) => {
 
 	useEffect(() => {
 		const getBorrowings = async () => {
-			const res = await axiosNoTokenInstance.get("/borrowings");
+			const res = await axiosNoTokenInstance.get("/borrowings/");
 			borrowingDispatch({ type: "INITIALIZE_BORROWING", payload: res.data });
 		};
 

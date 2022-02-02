@@ -20,8 +20,9 @@ const AdminDetail = (props) => {
 	const first_name = props.route.params.first_name;
 	const email = props.route.params.email;
 	const avatar = props.route.params.avatar;
-	const tel = props.route.params.tel;
 	const address = props.route.params.address;
+	const id = props.route.params.id;
+	const tel = props.route.params.tel;
 	let date = new Date(props.route.params.create_at);
 	const year = date.getFullYear();
 	const theDate = date.getDate();
@@ -91,8 +92,9 @@ const AdminDetail = (props) => {
 				</View>
 				<Card.Divider />
 				<Button
-					disabled={permissions ? false : true}
-					color={permissions ? "red" : "#bbb"}
+					// disabled={permissions ? false : true}
+					// color={permissions ? "red" : "#bbb"}
+					color="red"
 					title="Delete"
 					icon={{
 						name: "deleteuser",
@@ -102,7 +104,8 @@ const AdminDetail = (props) => {
 					}}
 					iconContainerStyle={{ marginRight: 5 }}
 					buttonStyle={{
-						backgroundColor: permissions ? "red" : "#bbb",
+						backgroundColor: "red",
+						// backgroundColor: permissions ? "red" : "#bbb",
 						borderColor: "transparent",
 						borderWidth: 0,
 						borderRadius: 30,
@@ -119,16 +122,16 @@ const AdminDetail = (props) => {
 								text: "DELETE",
 								onPress: async () => {
 									try {
-										const res = await axiosNoTokenInstance.delete(`/users/${item.id}/`);
+										const res = await axiosNoTokenInstance.delete(`/users/${id}/`);
 										adminDispatch({
 											type: "DELETE_ADMIN",
-											id: item.id,
+											id: id,
 										});
 										userDispatch({
 											type: "DELETE_USER",
-											id: item.id,
+											id: id,
 										});
-
+										props.navigation.goBack();
 										Alert.alert("SUCCESS", "Admin was deleted", [
 											{
 												text: "OKAY",

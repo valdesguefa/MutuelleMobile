@@ -9,7 +9,7 @@ const UserContextProvider = (props) => {
 
 	useEffect(() => {
 		const getUsers = async () => {
-			const res = await axiosNoTokenInstance.get("/users");
+			const res = await axiosNoTokenInstance.get("/users/");
 			userDispatch({ type: "INITIALIZE_USER", payload: res.data });
 		};
 

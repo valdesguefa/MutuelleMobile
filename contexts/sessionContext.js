@@ -9,7 +9,7 @@ const SessionContextProvider = (props) => {
 
 	useEffect(() => {
 		const getSessions = async () => {
-			const res = await axiosNoTokenInstance.get("/sessions_");
+			const res = await axiosNoTokenInstance.get("/sessions_/");
 			sessionDispatch({ type: "INITIALIZE_SESSION", payload: res.data });
 		};
 

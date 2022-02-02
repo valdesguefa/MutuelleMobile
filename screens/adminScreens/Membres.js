@@ -48,6 +48,8 @@ export default function Membres({ navigation }) {
 	const [modalOpen, setModalOpen] = useState(false);
 	const [permissions, setPermissions] = useState(auth.permissions);
 
+	// console.log("MEMBERS:", members);
+	// console.log("AUTH FROM MEMBERS:", members);
 	const handleCreateMember = async (name, first_name, tel, email, address, password) => {
 		// dispatch({ type: "LOADING" });
 
@@ -82,7 +84,7 @@ export default function Membres({ navigation }) {
 				},
 			]);
 			const resp = await axiosNoTokenInstance.post("/members/", {
-				administrator_id: auth.administrator_id,
+				administrator_id: auth.user.administrator_id,
 				user_id: res.data.user.id,
 			});
 		} catch (err) {
@@ -253,8 +255,9 @@ export default function Membres({ navigation }) {
 				<Icon
 					name="add-circle"
 					size={70}
-					disabled={permissions ? false : true}
-					color={permissions ? "#f4511e" : "#bbb"}
+					color="#f4511e"
+					// disabled={permissions ? false : true}
+					// color={permissions ? "#f4511e" : "#bbb"}
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 					onPress={() => setModalOpen(true)}
 				/>
