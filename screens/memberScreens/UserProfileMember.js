@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
 	TouchableOpacity,
 	Linking,
@@ -18,8 +18,10 @@ import * as Font from "expo-font";
 import axios from "axios";
 import headerObj from "../../shared/token";
 import URL from "../../shared/URL";
+//import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
-export default function UserProfileMember(props) {
+export default function UserProfileMember({ navigation }) {
 	const [user, setuser] = useState({});
 	const [fontsLoaded, setfontsLoaded] = useState(false);
 	const [password, setPassword] = useState("");
@@ -27,12 +29,13 @@ export default function UserProfileMember(props) {
 	const [users, setusers] = useState([]);
 	const [members, setmembers] = useState([]);
 	const [member, setmember] = useState({});
+	const { auth } = useContext(AuthContext);
 
 	//recuperation du password et email
 	useEffect(() => {
-		setemail(props.Email);
-		setPassword(props.password);
-	}, [props.Email, props.password]);
+		setemail(auth.user.email);
+		setPassword(auth.user.password);
+	}, [auth]);
 	//requete vers l'API pour avoir le user correspondant
 	useEffect(() => {
 		axios

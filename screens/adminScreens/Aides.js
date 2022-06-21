@@ -5,36 +5,68 @@ import headerObj from "../../shared/token";
 import URL from "../../shared/URL";
 import CarouselHelp from "./CarouselHelp";
 import * as Font from "expo-font";
-import { Dimensions } from 'react-native';
 import { AuthContext } from "../../contexts/AuthContext";
 import { Avatar, Icon, ListItem } from "react-native-elements";
-import AddHelpStack from "../../routes/AddHelpStack";
+import { useFocusEffect } from "@react-navigation/native";
 
-const Aides = ({navigation}) => {
-    const [activeHelp, setactiveHelp] = useState([])
-    const [NoactiveHelp, setNoactiveHelp] = useState([])
-    const [members, setmembers] = useState([])
-    const [users, setusers] = useState([])
-    const [Admin, setAdmin] = useState([])
-    const [helpType, sethelpType] = useState([])
-    const [fontsLoaded, setfontsLoaded] = useState(false)
-    const [temporel1, settemporel1] = useState([])
-    const [temporel2, settemporel2] = useState([])
-    const { auth, dispatch } = useContext(AuthContext);
+const Aides = ({ navigation }) => {
+	const [activeHelp, setactiveHelp] = useState([]);
+	const [NoactiveHelp, setNoactiveHelp] = useState([]);
+	const [members, setmembers] = useState([]);
+	const [users, setusers] = useState([]);
+	const [Admin, setAdmin] = useState([]);
+	const [helpType, sethelpType] = useState([]);
+	const [fontsLoaded, setfontsLoaded] = useState(false);
+	const [temporel1, settemporel1] = useState([]);
+	const [temporel2, settemporel2] = useState([]);
+	const { auth, dispatch } = useContext(AuthContext);
 	const [permissions, setPermissions] = useState(auth.permissions);
 
-    async function loadFonts() {
-        await Font.loadAsync({
-            poppinsBold: require('../.././assets/fonts/Poppins-Medium.otf'),
+	async function loadFonts() {
+		await Font.loadAsync({
+			poppinsBold: require("../.././assets/fonts/Poppins-Medium.otf"),
+		});
+		setfontsLoaded(true);
+	}
 
-        });
-        setfontsLoaded(true);
-    }
+	useEffect(() => {
+		loadFonts();
+	}, []);
 
-    useEffect(() => {
-        loadFonts();
-    }, [])
-/*
+	useFocusEffect(
+		React.useCallback(() => {
+			axios
+				.get(URL + `helps/`, headerObj)
+				.then((response) => {
+					var val1 = [];
+					var val2 = [];
+					// console.log('donner recu',response.data)
+					for (let obj of response.data) {
+						if (obj["state"] === 1) {
+							// setactiveHelp(obj)
+							val1.push(obj);
+
+							// console.log('activeHelp',activeHelp)
+						} else {
+							// setNoactiveHelp(obj)
+							val2.push(obj);
+							//  setNoactiveHelp(val2)
+						}
+					}
+					//console.log('val1',val1)
+					setactiveHelp(val1);
+					setNoactiveHelp(val2);
+					//  console.log('activeHelp',activeHelp)
+				})
+				.catch((error) => console.log(error));
+
+			return () => {
+				// Do something when the screen is unfocused
+				// Useful for cleanup functions
+			};
+		}, [])
+	);
+	/*
     useEffect(() => {
         //console.log('bonsoir')
         axios.get(URL + `administrators/`, headerObj).then((response) => {
@@ -52,35 +84,7 @@ const Aides = ({navigation}) => {
     }, [])
 */
 
-    useEffect(() => {
-        axios.get(URL + `helps/`, headerObj).then((response) => {
-            var val1 = []
-            var val2 = []
-            // console.log('donner recu',response.data)
-            for (let obj of response.data) {
-                if (obj['state'] === 1) {
-                    // setactiveHelp(obj)
-                    val1.push(obj)
-
-                    // console.log('activeHelp',activeHelp)
-                }
-                else {
-                    // setNoactiveHelp(obj)
-                    val2.push(obj)
-                    //  setNoactiveHelp(val2)
-                }
-
-            }
-            //console.log('val1',val1)
-            setactiveHelp(val1)
-            setNoactiveHelp(val2)
-            //  console.log('activeHelp',activeHelp)
-
-        }).catch(error => console.log(error))
-
-    }, [])
-
-    /*
+	/*
 
     const loadId2 = (help) => {
         var tempo = []
@@ -148,45 +152,43 @@ const Aides = ({navigation}) => {
     }, [NoactiveHelp, helpType, members, users, Admin])
 
 */
-    if (fontsLoaded) {
-        return (
-            <View style={{alignItems:'center'}}>
-                <ScrollView >
-                    <Text numberOfLines={2} style={styles.text}>Aides financiaires auxquelles contribuer</Text>
-                    <CarouselHelp helpList={activeHelp} navigation={navigation} />
+	if (fontsLoaded) {
+		return (
+			<View style={{ alignItems: "center" }}>
+				<ScrollView>
+					<Text numberOfLines={2} style={styles.text}>
+						Aides financiaires auxquelles contribuer
+					</Text>
+					<CarouselHelp helpList={activeHelp} navigation={navigation} />
 
-                    <Text numberOfLines={2} style={styles.text}>Aides financiaires totalement contribuées</Text>
-                    <CarouselHelp helpList={NoactiveHelp} navigation={navigation} />
+					<Text numberOfLines={2} style={styles.text}>
+						Aides financiaires totalement contribuées
+					</Text>
+					<CarouselHelp helpList={NoactiveHelp} navigation={navigation} />
+				</ScrollView>
 
-                </ScrollView>
-                
-                <Icon
+				<Icon
 					name="add-circle"
 					size={70}
-					color="#f4511e"
+					color="#ff884b"
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
-					onPress={() => navigation.navigate('addHelp')}
+					onPress={() => navigation.navigate("addHelp")}
 				/>
-                
-               
-            </View>
-        )
-    }
-    else {
-        return null
-    }
-}
+			</View>
+		);
+	} else {
+		return null;
+	}
+};
 
-
-export default Aides
-
+export default Aides;
 
 const styles = StyleSheet.create({
-    text: {
-        color: 'black',
-        fontFamily: 'poppinsBold',
-        paddingBottom: -80,
-        fontSize: 20,
-        alignSelf: 'center'
-    }
+	text: {
+		color: "black",
+		fontFamily: "poppinsBold",
+		paddingBottom: -80,
+		fontSize: 20,
+		alignSelf: "center",
+	},
 });

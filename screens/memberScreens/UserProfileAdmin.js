@@ -12,7 +12,8 @@ import {
 	Text,
 	View,
 } from "react-native";
-import { Avatar, Button, Icon } from "react-native-elements";
+import { useFocusEffect } from '@react-navigation/native';
+import { Avatar, Icon } from "react-native-elements";
 import * as Animatable from "react-native-animatable";
 import * as Font from "expo-font";
 import axios from "axios";
@@ -33,13 +34,13 @@ export default function UserProfileAdmin({ navigation }) {
 	const { auth } = useContext(AuthContext);
 
 	//recuperation du password et email
-	useEffect(() => {
+	useFocusEffect( React.useCallback(() => {
 		setemail(auth.user.email);
 		setPassword(auth.user.password);
-	}, []);
+	}, [auth]))
 	// }, [props.Email, props.password]);
 	//requete vers l'API pour avoir le user correspondant
-	useEffect(() => {
+	useFocusEffect( React.useCallback(() => {
 		axios
 			.get(URL + `users/`, headerObj)
 			.then((response) => {
@@ -56,9 +57,9 @@ export default function UserProfileAdmin({ navigation }) {
 			.catch((error) => {
 				console.log("voici l'erreur", error);
 			});
-	}, [password, email]);
+	}, [password, email]))
 	//requete pour avoir le username de l'utilisateur correspondant
-	useEffect(() => {
+	useFocusEffect( React.useCallback(() => {
 		axios
 			.get(URL + `administrators/`, headerObj)
 			.then((response) => {
@@ -77,7 +78,7 @@ export default function UserProfileAdmin({ navigation }) {
 			.catch((error) => {
 				console.log("voici l'erreur", error);
 			});
-	}, [user]);
+	}, [user]))
 
 	async function loadFonts() {
 		await Font.loadAsync({
@@ -87,14 +88,13 @@ export default function UserProfileAdmin({ navigation }) {
 		setfontsLoaded(true);
 	}
 
-	useEffect(() => {
+	useFocusEffect(   React.useCallback(() => {
 		loadFonts();
-	}, []);
-
+	}, []))
 	if (fontsLoaded) {
 		return (
 			<View>
-				{/* <View style={styles.header}>
+				<View style={styles.header}>
 					<ImageBackground
 						style={styles.headerBackgroundImage}
 						blurRadius={5}
@@ -119,14 +119,6 @@ export default function UserProfileAdmin({ navigation }) {
 								<View style={styles.userCityRow}>
 									<Text style={styles.userCityText}>{user["address"]}, Cameroun</Text>
 								</View>
-								<Button
-									title="Update profile"
-									buttonStyle={{
-										backgroundColor: "#ff751a",
-										borderRadius: 3,
-									}}
-									onPress={() => navigation.navigate("Profile update")}
-								/>
 							</View>
 						</View>
 					</ImageBackground>
@@ -148,6 +140,7 @@ export default function UserProfileAdmin({ navigation }) {
 							name="create"
 							color="black"
 							size={30}
+							onPress={()=>navigation.navigate('Profile update')}
 						/>
 					</View>
 
@@ -171,15 +164,7 @@ export default function UserProfileAdmin({ navigation }) {
 							<Text style={{ fontSize: 16, color: "black" }}>Date d'inscription:</Text> {user.create_at}
 						</Text>
 					</View>
-				</Animatable.View> */}
-				<Button
-					title="Update profile"
-					buttonStyle={{
-						backgroundColor: "#ff751a",
-						borderRadius: 3,
-					}}
-					onPress={() => navigation.navigate("Profile update")}
-				/>
+				</Animatable.View>
 			</View>
 		);
 	} else {
@@ -256,20 +241,23 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	header: {
-		flex: 3,
+		flex: 2,
 		justifyContent: "center",
 		alignItems: "center",
 		height: Dimensions.get("screen").height * 0.5,
 	},
 	footer: {
-		flex: 2,
+		flex: 1,
 		backgroundColor: "#FE7C00",
+		//height: 200,
 		width: Dimensions.get("screen").width * 1,
 		borderTopRightRadius: 50,
 		borderTopLeftRadius: 50,
-		alignSelf: "center",
-		marginBottom: -10,
+		//alignSelf: "center",
+		marginBottom: -750,
+		position: "relative",
 		paddingHorizontal: 30,
 		paddingVertical: 30,
+		paddingBottom: 90,
 	},
 });

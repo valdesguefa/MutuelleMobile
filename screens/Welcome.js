@@ -71,9 +71,8 @@ export default function Welcome({ navigation }) {
 			>
 				<Image source={require("../assets/polytech-logo.png")} style={{ width: 200, height: 200 }}></Image>
 				<View style={styles.centerView}>
-					<Text style={styles.mainText}>WELCOME</Text>
-					<Text style={styles.mainText}>to </Text>
-					<Text style={styles.mainText}>MUTUELLE</Text>
+					<Text style={styles.mainText}>ENSP</Text>
+					<Text style={styles.mainText}> MUTUELLE </Text>
 				</View>
 				<TouchableOpacity>
 					<Button

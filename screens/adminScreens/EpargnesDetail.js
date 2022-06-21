@@ -20,6 +20,7 @@ const EpargnesDetail = (props) => {
 		return `${him.first_name} ${him.name}`;
 	};
 
+	console.log("savings", savings);
 	// console.log("MEMBERS:", members);
 	// id, password, last_login, name, first_name, sex, email, avatar, tel, address, create_at, type;
 	// const date = props.route.params.date;
@@ -33,14 +34,20 @@ const EpargnesDetail = (props) => {
 	const theDate = date.getDate();
 	const month = date.getMonth();
 	const hisDate = `${theDate}-${month + 1}-${year}`;
+
+	const getDate = (string) => {
+		const date = new Date(string);
+		return date.toDateString();
+	};
 	// console.log("CREATED AT:", created_at);
 	// const created_by = props.route.params.name;
 	return (
 		<View style={globalStyles.container}>
 			{savings ? (
-				<Card style={{ display: "flex" }} containerStyle={{ borderRadius: 10 }}>
-					<Card.Title>{`${hisDate}  Session id: ${id}`}</Card.Title>
+				<Card style={{ display: "flex" }} containerStyle={{ borderRadius: 10, flex: 1 }}>
+					<Card.Title>{`Session de: ${getDate(props.route.params.date)}`}</Card.Title>
 					<Card.Divider />
+					{savings.length == 0 && <Text>Aucun epargne faite</Text>}
 					<FlatList
 						data={savings}
 						keyExtractor={(item, index) => index.toString()}

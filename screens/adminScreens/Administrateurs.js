@@ -251,7 +251,7 @@ export default function Administrateurs({ navigation }) {
 				<Icon
 					name="add-circle"
 					size={70}
-					color="#f4511e"
+					color="#ff884b"
 					// color={auth.permissions ? "#f4511e" : "#bbb"}
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 					onPress={() => setModalOpen(true)}

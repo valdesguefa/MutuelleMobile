@@ -11,7 +11,7 @@ import EmpruntsDetail from "../screens/adminScreens/EmpruntsDetail";
 
 const Stack = createNativeStackNavigator();
 
-export default function empruntStack() {
+export default function EmpruntStack() {
 	return (
 		<Stack.Navigator
 			initialRouteName="l'emprunt"

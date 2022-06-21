@@ -33,14 +33,21 @@ const EmpruntsDetail = (props) => {
 	const theDate = date.getDate();
 	const month = date.getMonth();
 	const hisDate = `${theDate}-${month + 1}-${year}`;
+
+	const getDate = (string) => {
+		const date = new Date(string);
+		return date.toDateString();
+	};
+	console.log("borrowings", borrowings);
 	// console.log("CREATED AT:", created_at);
 	// const created_by = props.route.params.name;
 	return (
 		<View style={globalStyles.container}>
 			{borrowings ? (
-				<Card style={{ display: "flex" }} containerStyle={{ borderRadius: 10 }}>
-					<Card.Title>{`${hisDate}  Session id: ${id}`}</Card.Title>
+				<Card style={{ display: "flex" }} containerStyle={{ borderRadius: 10, flex: 1 }}>
+					<Card.Title>{`Session de: ${getDate(props.route.params.date)}`}</Card.Title>
 					<Card.Divider />
+					{borrowings.length == 0 && <Text>Aucun Emprunt faite</Text>}
 					<FlatList
 						data={borrowings}
 						keyExtractor={(item, index) => index.toString()}
@@ -48,7 +55,11 @@ const EmpruntsDetail = (props) => {
 							<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
 								<ListItem.Content>
 									<ListItem.Title>{`Emprunt du membre : ${getMemberNames(item.member_id)}`}</ListItem.Title>
-									<ListItem.Subtitle>{`montant total de l'emprunts': ${item.amount}`}</ListItem.Subtitle>
+									<ListItem.Subtitle>{`montant total de l'emprunts: ${item.amount_borrowed}`}</ListItem.Subtitle>
+									<ListItem.Subtitle>{`intérêt ajouté': ${item.interest}`}</ListItem.Subtitle>
+									<ListItem.Subtitle>{`montant à rembourser: ${item.amount_to_pay}`}</ListItem.Subtitle>
+									<ListItem.Subtitle>{`montant remboursé: ${item.amount_paid}`}</ListItem.Subtitle>
+									<ListItem.Subtitle>{`délai de paiement: ${getDate(item.payment_date_line)}`}</ListItem.Subtitle>
 								</ListItem.Content>
 							</ListItem>
 						)}

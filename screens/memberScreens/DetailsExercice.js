@@ -310,7 +310,7 @@ const DetailsExercice = () => {
 											key={index}
 											style={{
 												alignSelf:'center',
-												backgroundColor: "#FE7C00",
+												backgroundColor: "white",
 												marginBottom: Dimensions.get("window").height *0.02,
 												width: Dimensions.get("window").width * 0.87,
 												paddingLeft: 30,
@@ -324,7 +324,7 @@ const DetailsExercice = () => {
 														style={{
 															fontSize: 18,
 															fontFamily: "poppinsBold",
-															color: "blue",
+															color: "black",
 														}}
 														numberOfLines={2}
 													>
@@ -339,7 +339,7 @@ const DetailsExercice = () => {
 														style={{
 															fontSize: 19,
 															fontFamily: "poppinsBold",
-															color: "blue",
+															color: "black",
 														}}
 													>
 														Exercice de l'année : {param.exercice["year"]}
@@ -351,7 +351,7 @@ const DetailsExercice = () => {
 											<View>
 												<Text
 													style={{
-														fontSize: 17,
+														fontSize: 14,
 														fontFamily: "poppinsMedium",
 														color: "black",
 													}}
@@ -361,7 +361,7 @@ const DetailsExercice = () => {
 
 												<Text
 													style={{
-														fontSize: 17,
+														fontSize: 14,
 														fontFamily: "poppinsMedium",
 														color: "black",
 													}}
@@ -371,7 +371,7 @@ const DetailsExercice = () => {
 
 												<Text
 													style={{
-														fontSize: 17,
+														fontSize: 14,
 														fontFamily: "poppinsMedium",
 														color: "black",
 													}}
@@ -381,7 +381,7 @@ const DetailsExercice = () => {
 
 												<Text
 													style={{
-														fontSize: 17,
+														fontSize: 14,
 														fontFamily: "poppinsMedium",
 														color: "black",
 													}}
@@ -390,8 +390,8 @@ const DetailsExercice = () => {
 												</Text>
 
 												{param.exercice.active !== 1 ? (
-													<Text style={{ fontFamily: "poppinsBold", fontSize: 19 }}>
-														Total obtenu : {getTotal(param.sessions)} XAF
+													<Text style={{ fontFamily: "poppinsBold", fontSize: 13,paddingLeft:90 }}>
+														Total : {getTotal(param.sessions)} XAF
 													</Text>
 												) : (
 													<Text style={{ fontFamily: "poppinsBold", fontSize: 19 }}>Total obtenu : ####</Text>
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "white",
+		backgroundColor: "#f6f6f6",
 	},
 	dropDownItem: {
 		top: Dimensions.get("window").height * 0.2,

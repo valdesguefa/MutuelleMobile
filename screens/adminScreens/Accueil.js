@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, Modal, StyleSheet, Text, View, ActivityIndicator } from "react-native";
-import { Button, Card, Icon } from "react-native-elements";
+import { Alert, Modal, StyleSheet, Text, View, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
+import { Button, Card, Icon, ListItem } from "react-native-elements";
 import { AuthContext } from "../../contexts/AuthContext";
 import { ConfigContext } from "../../contexts/configContext";
 import { MemberContext } from "../../contexts/memberContext";
@@ -18,13 +18,7 @@ import { RefundContext } from "../../contexts/refundContext";
 import { BorrowingContext } from "../../contexts/borrowingContext";
 import { HelpContext } from "../../contexts/helpContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
-// const helpTypeCreateSchema = yup.object({
-// 	annee: yup
-// 		.string()
-// 		.required("un l'annee doit etre preciser")
-// 		.test("isValidNumber", "annee invalid", (val) => parseInt(val) > 0),
-// });
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Accueil({ navigation }) {
 	const { auth, dispatch } = useContext(AuthContext);
@@ -44,11 +38,24 @@ export default function Accueil({ navigation }) {
 	const [loadingContent, setLoadingContent] = useState(true);
 	const [blurExoYear, setBlurExoYear] = useState(false);
 	const [changedSession, setChangedSession] = useState(false);
-
-	console.log("REFUNDS:", refunds);
-
-	console.log("SAVINGS:", savings);
-	console.log("BORROWINGS:", borrowings);
+	const [newBorrowings, setNewBorrowings] = useState(null);
+	const [newSavings, setNewSavings] = useState(null);
+	const [newRefunds, setNewRefunds] = useState(null);
+	const [newTresorie, setNewTresorie] = useState(0);
+	const [newObligContribs, setNewObligContribs] = useState(null);
+	const [newMembers, setNewMembers] = useState(null);
+	const [newFondSocial, setNewFondSocial] = useState(0);
+	const [isPlusSession, setIsPlusSession] = useState(false);
+	const [isBlurSession, setIsBlurSession] = useState(false);
+	const [isPlusExo, setIsPlusExo] = useState(false);
+	const [currentSession, setCurrentSession] = useState(null);
+	const [currentExercise, setCurrentExercise] = useState(null);
+	const [sessionModalOpen, setSessionModalOpen] = useState(false);
+	const [exoModalOpen, setExoModalOpen] = useState(false);
+	const [asks, setAsks] = useState([]);
+	const [unhandledAsks, setUnhandledAsks] = useState(null);
+	const [newUsers, setNewUsers] = useState(null);
+	const [changed, setChanged] = useState(true);
 
 	const french = {
 		SAVING: "Epargnes",
@@ -66,7 +73,124 @@ export default function Accueil({ navigation }) {
 		REFUND: "SAVING",
 		BORROWING: "REFUND",
 	};
-	// console.log("AUTH FROM ACCUEIL:    ", auth);
+
+	const fetchAskBorrowingHelps = async () => {
+		try {
+			let res = await axiosNoTokenInstance.get("/users/");
+			const users = res.data;
+			setNewUsers(users);
+
+			res = await axiosNoTokenInstance.get("/ask_Borrowings_Helps/");
+			const asks = res.data;
+			setAsks(asks);
+
+			const unHandledAsks = asks.filter((ask) => ask.state == 1);
+			const orderedUnhandledAsks = unHandledAsks.reverse();
+			setAsks(orderedUnhandledAsks);
+
+			res = await axiosNoTokenInstance.get("/sessions_/");
+			const newSessions = res.data;
+		} catch (err) {
+			console.log(err.message);
+			console.log(err.response.data);
+			console.log(err.response.status);
+		}
+	};
+
+	const setExerciseExistAndSessionState = async () => {
+		try {
+			let res = await axiosNoTokenInstance.get("/exercises/");
+			const newExercises = res.data;
+
+			res = await axiosNoTokenInstance.get("/sessions_/");
+			const newSessions = res.data;
+
+			let currentExerciseI;
+			if (newExercises.length) {
+				currentExerciseI = newExercises[newExercises.length - 1];
+				setCurrentExercise(currentExerciseI);
+
+				let currentSessionI;
+				currentSessionI = newSessions[newSessions.length - 1];
+				setCurrentSession(currentSessionI);
+
+				if (currentExerciseI.active == 0) {
+					setIsPlusExo(true);
+					setIsBlurSession(true);
+				} else {
+					if (newSessions.length) {
+						// let currentSessionI;
+						// currentSessionI = newSessions[newSessions.length - 1];
+						// setCurrentSession(currentSessionI);
+						if (currentSessionI.active == 0) setIsPlusSession(true);
+					} else {
+						setIsPlusSession(true);
+					}
+				}
+			} else {
+				setIsPlusExo(true);
+				setIsBlurSession(true);
+			}
+		} catch (err) {
+			console.log(err.message);
+			console.log(err.response.data);
+			console.log(err.response.status);
+		}
+	};
+
+	const fetchTresorieFondSocial = async () => {
+		try {
+			let res = await axiosNoTokenInstance.get("/borrowings/");
+			const newBorrowings = res.data;
+			setNewBorrowings(newBorrowings);
+
+			res = await axiosNoTokenInstance.get("/savings/");
+			const newSavings = res.data;
+			setNewSavings(newSavings);
+
+			res = await axiosNoTokenInstance.get("/refunds/");
+			const newRefunds = res.data;
+			setNewRefunds(newRefunds);
+
+			res = await axiosNoTokenInstance.get("/obligatory_contributions/");
+			const obligatoryContributions = res.data;
+			setNewObligContribs(obligatoryContributions);
+
+			res = await axiosNoTokenInstance.get("/members/");
+			const newMembers = res.data;
+			setNewMembers(newMembers);
+
+			//Get tresorie
+			let tempTresorie = 0;
+			newSavings.forEach((saving) => (tempTresorie += saving.amount));
+			newRefunds.forEach((refund) => (tempTresorie += refund.amount));
+			newBorrowings.forEach((borrowing) => (tempTresorie -= borrowing.amount_borrowed));
+			setNewTresorie(tempTresorie);
+
+			let tempFonds = 0;
+			tempFonds =
+				obligatoryContributions.length * configs.monthly_contribution_per_member +
+				newMembers.length * configs.inscription_per_member;
+			setNewFondSocial(tempFonds);
+		} catch (err) {
+			console.log(err.message);
+			console.log(err.response.data);
+			console.log(err.response.status);
+		}
+	};
+
+	useFocusEffect(
+		React.useCallback(() => {
+			fetchAskBorrowingHelps();
+			fetchTresorieFondSocial();
+			setExerciseExistAndSessionState();
+
+			return () => {
+				// Do something when the screen is unfocused
+				// Useful for cleanup functions
+			};
+		}, [modalOpen, sessionModalOpen, changed])
+	);
 
 	useEffect(() => {
 		if (auth.current_state == "SAVING") {
@@ -108,18 +232,6 @@ export default function Accueil({ navigation }) {
 		});
 	}
 	let tresorie = saves + refs - bors;
-
-	// useEffect(() => {
-	// 	if (savings) setTresorie(tresorie + savings[savings.length - 1].amount);
-	// }, [savings]);
-
-	// useEffect(() => {
-	// 	if (refunds.length > 0) setTresorie(tresorie + refunds[refunds.length - 1].amount);
-	// }, [refunds]);
-
-	// useEffect(() => {
-	// 	if (borrowings.length > 0) setTresorie(tresorie - borrowings[borrowings.length - 1].amount);
-	// }, [borrowings]);
 
 	useEffect(() => {
 		const setCurrent = async () => {
@@ -164,6 +276,7 @@ export default function Accueil({ navigation }) {
 					});
 					setLoadingContent(false);
 				}
+				setLoadingContent(false);
 			} catch (err) {
 				console.log(err.message);
 				console.log(err.response.data);
@@ -179,9 +292,7 @@ export default function Accueil({ navigation }) {
 		const membersGotten = users.filter((user) => user.type == "member");
 		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersGotten });
 		let membersToModify = membersGotten;
-		// Add to members info from members table
 
-		// console.log("MEMBERSTOMODIFY:", membersToModify);
 		memberDispatch({ type: "INITIALIZE_MEMBERS", payload: membersToModify });
 
 		const addMoreToAuth = async () => {
@@ -248,6 +359,7 @@ export default function Accueil({ navigation }) {
 					year: annee.getFullYear(),
 					administrator_id: auth.user.administrator_id,
 					create_at: date,
+					active: 1,
 				});
 				exerciseDispatch({
 					type: "ADD_EXERCISE",
@@ -298,21 +410,6 @@ export default function Accueil({ navigation }) {
 				prop: "current_state",
 			});
 			setChangedSession(!changedSession);
-			// console.log("SESSION NO:", res.data.user);
-
-			// if (auth.current_session_no < 10) {
-			// 	dispatch({
-			// 		type: "UPDATE_AUTH",
-			// 		payload: auth.current_session_no++,
-			// 		prop: "current_session_no",
-			// 	});
-			// } else {
-			// 	dispatch({
-			// 		type: "UPDATE_AUTH",
-			// 		payload: 1,
-			// 		prop: "current_session_no",
-			// 	});
-			// }
 
 			setLoading(false);
 			setModalOpen(false);
@@ -330,7 +427,6 @@ export default function Accueil({ navigation }) {
 
 	const [showAnneeDP, setShowAnneeDP] = useState(false);
 	const [showDateDP, setShowDateDP] = useState(false);
-	// console.log("DATE:", date.toDateString());
 
 	const onDateChange = (event, selectedDate) => {
 		const currentDate = selectedDate || date;
@@ -406,7 +502,6 @@ export default function Accueil({ navigation }) {
 				]
 			);
 		} else {
-			console.log("clicked");
 			setModalOpen(true);
 			if (auth.current_session_no == 10) {
 				setBlurExoYear(false);
@@ -443,6 +538,87 @@ export default function Accueil({ navigation }) {
 			},
 		]);
 	};
+	const getFormattedDate = (string) => {
+		const date = new Date(string);
+		return date.toDateString();
+	};
+
+	const getDate = (string) => {
+		return new Date(string);
+	};
+	const handleSessionModalOpenning = () => {
+		if (isPlusSession) {
+			setSessionModalOpen(true);
+		} else {
+			Alert.alert("ATTENTION!!", `Êtes-vous sûr(e) de vouloir cloturer la session? `, [
+				{
+					text: "OUI",
+					onPress: async () => {
+						try {
+							const res = await axiosNoTokenInstance.patch(`/sessions_/${currentSession.id}/`, {
+								state: "END",
+								active: 0,
+							});
+							sessionDispatch({
+								type: "UPDATE_SESSION",
+								payload: res.data,
+								id: res.data.id,
+							});
+						} catch (err) {
+							console.log(err.message);
+							console.log(err.response.data);
+							console.log(err.response.status);
+						}
+						setIsPlusSession(!isPlusSession);
+					},
+				},
+
+				{
+					text: "ANNULER",
+				},
+			]);
+		}
+	};
+
+	const handleCreateSession = async () => {
+		try {
+			let res = await axiosNoTokenInstance.post("/sessions_/", {
+				exercise_id: currentExercise.id,
+				administrator_id: auth.user.administrator_id,
+				create_at: date,
+				date: date,
+			});
+
+			setLoading(false);
+			setSessionModalOpen(false);
+			Alert.alert("SUCCESS", "Une nouvelle session a ete commencer", [
+				{
+					text: "OKAY",
+				},
+			]);
+
+			sessionDispatch({
+				type: "ADD_SESSION",
+				payload: res.data,
+			});
+			dispatch({
+				type: "UPDATE_AUTH",
+				payload: res.data.id,
+				prop: "current_session_id",
+			});
+			dispatch({
+				type: "UPDATE_AUTH",
+				payload: res.data.state,
+				prop: "current_state",
+			});
+		} catch (err) {
+			console.log(err.message);
+			console.log(err.response.data);
+			console.log(err.response.status);
+		}
+		setIsPlusSession(!isPlusSession);
+		setSessionModalOpen(false);
+	};
 
 	if (loadingContent) {
 		return (
@@ -451,8 +627,143 @@ export default function Accueil({ navigation }) {
 			</View>
 		);
 	}
+
+	const handleExoModalOpenning = () => {
+		if (isPlusExo) {
+			setExoModalOpen(true);
+		} else {
+			Alert.alert(
+				"ATTENTION!!",
+				`Êtes-vous sûr de vouloir cloturer l'exercice ? \n Aucune transaction non gérée ne serait reportée sur le nouvel exercice. \n`,
+				[
+					{
+						text: "OUI",
+						onPress: async () => {
+							try {
+								const res = await axiosNoTokenInstance.patch(`/exercises/${currentExercise.id}/`, {
+									active: 0,
+								});
+							} catch (err) {
+								console.log(err.message);
+								console.log(err.response.data);
+								console.log(err.response.status);
+							}
+							setIsPlusExo(!isPlusExo);
+						},
+					},
+
+					{
+						text: "NON",
+					},
+				]
+			);
+		}
+	};
+
+	const getUsersNames = (id) => {
+		console.log("id", id);
+		const him = newUsers.find((user) => user.id == id);
+		console.log("him", him);
+		return `${him.first_name} ${him.name}`;
+	};
+
+	console.log("asks", asks);
+	console.log("newUsers", newUsers);
+
 	return (
 		<View style={globalStyles.container}>
+			<Modal visible={sessionModalOpen} animationType="slide">
+				<View style={globalStyles.container}>
+					<Icon name="close" onPress={() => setSessionModalOpen(false)} />
+					<Formik
+						// validationSchema={helpTypeCreateSchema}
+						initialValues={{
+							annee: currentExercise ? getDate(currentExercise.create_at).getFullYear().toString() : null,
+							date: date.toDateString(),
+						}}
+						onSubmit={(values) => {
+							handleCreateSession(values);
+							// handlePress();
+						}}
+					>
+						{(props) => (
+							<View
+								style={{
+									// paddingVertical: 20,
+									flex: 1,
+									opacity: 1,
+									marginTop: 120,
+									borderBottomWidth: 1,
+									borderBottomColor: "#222",
+									borderTopColor: "#222",
+									borderTopWidth: 1,
+									justifyContent: "center",
+									marginBottom: 120,
+								}}
+							>
+								<View style={{ flexDirection: "row", alignItems: "center" }}>
+									<TextInput
+										label="Annee de l'exercice"
+										mode="outlined"
+										disabled
+										style={{ flex: 3, marginRight: 20 }}
+										value={annee.getFullYear().toString()}
+										theme={{ colors: { disabled: "#ff751a" } }}
+									/>
+									<Icon
+										name="calendar"
+										size={50}
+										type="foundation"
+										color="#ff751a"
+										// onPress={}
+										// () => setShowAnneeDP(true)
+									/>
+								</View>
+
+								<HelperText type="error" visible={true}></HelperText>
+
+								<View style={{ flexDirection: "row", alignItems: "center" }}>
+									<TextInput
+										label="Date date de début de la session"
+										mode="outlined"
+										disabled
+										style={{ flex: 3, marginRight: 20 }}
+										value={date.toDateString()}
+										theme={{ colors: { disabled: "#ff751a" } }}
+									/>
+									<Icon
+										name="calendar"
+										size={50}
+										type="foundation"
+										color="#ff751a"
+										onPress={() => setShowDateDP(true)}
+									/>
+								</View>
+								<HelperText type="error" visible={true}></HelperText>
+								{showDateDP && (
+									<DateTimePicker
+										testID="dateTimePicker"
+										value={date}
+										mode="date"
+										is24Hour={true}
+										display="default"
+										onChange={onDateChange}
+									/>
+								)}
+								<FlatButton
+									text={loading ? "loading..." : "Commencer une nouvelle session"}
+									onPress={() => {
+										setLoading(true);
+										props.handleSubmit();
+									}}
+									color="black"
+								/>
+							</View>
+						)}
+					</Formik>
+				</View>
+			</Modal>
+
 			<Modal visible={modalOpen} animationType="slide">
 				<View style={globalStyles.container}>
 					<Icon name="close" onPress={() => setModalOpen(false)} />
@@ -564,148 +875,42 @@ export default function Accueil({ navigation }) {
 					</Formik>
 				</View>
 			</Modal>
-			{exercises.length ? (
-				<View>
-					<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
-						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-							<Card.Title>Tresorie</Card.Title>
-							<Card.Divider />
-							<View style={{ alignItems: "center" }}>
-								<Text>{`${tresorie} XAF`}</Text>
-							</View>
-						</Card>
-						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-							<Card.Title>Fond social</Card.Title>
-							<Card.Divider />
-							<View style={{ alignItems: "center" }}>
-								<Text>{`${fondSocial} XAF`}</Text>
-							</View>
-						</Card>
-					</View>
 
-					<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
-						{auth.current_state != "END" && <Card.Title>{`PHASE ${french[auth.current_state]}`}</Card.Title>}
-						{auth.current_state != "END" && (
+			<View style={{ flex: 1 }}>
+				<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
+					<Card.Title>
+						{currentExercise ? `Exercise de l'annee ${currentExercise.year}/ ${currentExercise.year + 1}` : "COMMENCER"}
+					</Card.Title>
+					<Card.Divider />
+					<View style={{ alignItems: "center" }}>
+						<Text style={{ marginBottom: 10 }}>
+							{" "}
+							{currentExercise && currentSession
+								? isPlusSession
+									? `Session de ${getFormattedDate(currentSession.create_at)} terminé `
+									: `Session de ${getFormattedDate(currentSession.create_at)} en cours `
+								: "Aucun exercice et aucune session n'ont été créés "}
+						</Text>
+						{currentExercise ? (
 							<Button
-								title={`Faire les ${french[auth.current_state]}`}
-								buttonStyle={{
-									backgroundColor: "#ff751a",
-									borderColor: "transparent",
-									borderRadius: 5,
-								}}
-								raised
-								// icon={{
-								// 	name: "next",
-								// 	type: "foundation",
-								// 	size: 15,
-								// 	color: "white",
-								// }}
 								iconRight
-								onPress={() => {
-									handleCurrentState();
-								}}
-							/>
-						)}
-						<Card.Divider />
-						<View style={{ alignItems: "center", justifyContent: "center" }}>
-							<View>
-								<Button
-									title={
-										nextState != "terminer"
-											? auth.current_state == "END"
-												? `${nextState} session`
-												: `passer aux ${nextState}`
-											: `${nextState} session`
-									}
-									buttonStyle={{
-										backgroundColor: "#ff751a",
-										borderColor: "transparent",
-										borderRadius: 5,
-									}}
-									raised
-									icon={{
-										name: "next",
-										type: "foundation",
-										size: 15,
-										color: "white",
-									}}
-									iconRight
-									onPress={() => {
-										handleNextState();
-									}}
-								/>
-								{preState != "" && (
-									<Button
-										raised
-										title={`rentourner aux ${preState}`}
-										buttonStyle={{
-											backgroundColor: "#ff751a",
-											borderColor: "transparent",
-											borderRadius: 5,
-										}}
-										containerStyle={{ marginVertical: 20 }}
-										icon={{
-											name: "previous",
-											type: "foundation",
-											size: 15,
-											color: "white",
-										}}
-										iconLeft
-										onPress={() => {
-											handlePreviousState();
-										}}
+								icon={
+									<Icon
+										name={isPlusSession ? "add-circle" : "cancel"}
+										size={50}
+										// disabled={exerciseExist ? false : true}
+										color="white"
+										containerStyle={{ paddingEnd: 20, paddingStart: 10 }}
 									/>
-								)}
-							</View>
-						</View>
-						<Card.Divider />
-						{auth.current_state != "END" && (
-							<Card.Title>{`SESSION ${auth.current_session_no} de DE L'EXERCICE ${auth.current_exercise_no}`}</Card.Title>
-						)}
-					</Card>
-
-					<Card containerStyle={{ borderRadius: 10 }}>
-						<Card.Title>Evenements de la mutuelle</Card.Title>
-
-						{/* <View style={{ alignItems: "center" }}>
-					{helps.length && <Text style={{ marginBottom: 10 }}>Aucune aide active</Text>}
-					<Button
-						title={helps.lenght ? "Consulter les aides disponible" : ""}
-						buttonStyle={{
-							backgroundColor: "#ff751a",
-							borderColor: "transparent",
-							borderRadius: 5,
-						}}
-					/>
-				</View> */}
-					</Card>
-				</View>
-			) : (
-				<View>
-					<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
-						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-							<Card.Title>Tresorie</Card.Title>
-							<Card.Divider />
-							<View style={{ alignItems: "center" }}>
-								<Text>{`${tresorie} XAF`}</Text>
-							</View>
-						</Card>
-						<Card containerStyle={{ borderRadius: 10, width: 150 }}>
-							<Card.Title>Fond social</Card.Title>
-							<Card.Divider />
-							<View style={{ alignItems: "center" }}>
-								<Text>{`${fondSocial} XAF`}</Text>
-							</View>
-						</Card>
-					</View>
-
-					<Card containerStyle={{ borderRadius: 10, marginBottom: 20 }}>
-						<Card.Title>Exrcice</Card.Title>
-						<Card.Divider />
-						<View style={{ alignItems: "center" }}>
-							<Text style={{ marginBottom: 10 }}>Aucun exercice en activite</Text>
+								}
+								title={isPlusSession ? "Commencer une nouvelle session " : "Terminer la session en cours "}
+								buttonStyle={{ backgroundColor: "#ff751a", width: "80%", borderRadius: 15 }}
+								onPress={handleSessionModalOpenning}
+							/>
+						) : (
 							<Button
-								title="COMMENCER UN NOUVEL EXERCICE"
+								title="Créez-les"
+								icon={<Icon name="arrow-right" size={30} color="white" />}
 								buttonStyle={{
 									backgroundColor: "#ff751a",
 									borderColor: "transparent",
@@ -715,28 +920,233 @@ export default function Accueil({ navigation }) {
 									setModalOpen(true);
 								}}
 							/>
-						</View>
-					</Card>
-
-					<Card containerStyle={{ borderRadius: 10 }}>
-						<Card.Title>Evenements de la mutuelle</Card.Title>
+						)}
+					</View>
+				</Card>
+				<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
+					<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+						<Card.Title>Tresorie</Card.Title>
 						<Card.Divider />
 						<View style={{ alignItems: "center" }}>
-							<Text style={{ marginBottom: 10 }}>Aucune aide active</Text>
-							<Button
-								title="CREER UNE NOUVELLE AIDE"
-								buttonStyle={{
-									backgroundColor: "#ff751a",
-									borderColor: "transparent",
-									borderRadius: 5,
-								}}
-							/>
+							<Text>{`${newTresorie} XAF`}</Text>
+						</View>
+					</Card>
+					<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+						<Card.Title>Fond social</Card.Title>
+						<Card.Divider />
+						<View style={{ alignItems: "center" }}>
+							<Text>{`${newFondSocial} XAF`}</Text>
 						</View>
 					</Card>
 				</View>
-			)}
+
+				<View style={{ borderRadius: 10, flex: 1 }}>
+					<Card style={{ alignItems: "center", flex: 1 }}>
+						<Card.Title>Evenements de la mutuelle</Card.Title>
+						{asks.length ? (
+							<FlatList
+								data={asks}
+								keyExtractor={(item, index) => index.toString()}
+								renderItem={({ item }) => (
+									<TouchableOpacity
+										onPress={() =>
+											Alert.alert(`${item.title}`, `${item.body} \n Emprunt de : ${item.amount} XAF`, [
+												{
+													text: "Gerer",
+													onPress: async () => {
+														console.log(`voici votre id ${item.id}`);
+														const res = await axiosNoTokenInstance.patch(`/ask_Borrowings_Helps/${item.id}/`, {
+															state: 0,
+														});
+														console.log("RESULT:", res.data);
+														setChanged(!changed);
+
+														Alert.alert("SUCCESS", "Votre Demande a été prise en compte", [
+															{
+																text: "OKAY",
+															},
+														]);
+													},
+													style: "cancel",
+												},
+												{
+													text: "Ok",
+												},
+											])
+										}
+										key={item.index}
+									>
+										<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
+											<ListItem.Content>
+												<ListItem.Title>{`${getUsersNames(item.user_id)}  ${item.title}  ${getFormattedDate(
+													item.create_at
+												)}`}</ListItem.Title>
+												<ListItem.Subtitle>{`${item.body}`}</ListItem.Subtitle>
+											</ListItem.Content>
+											<Icon name="arrow-forward-ios" type="material" color="#ff751a" />
+										</ListItem>
+									</TouchableOpacity>
+								)}
+							/>
+						) : (
+							<Text style={{ marginBottom: 10 }}>Aucune aide active </Text>
+						)}
+					</Card>
+				</View>
+			</View>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({});
+
+{
+	/* <Modal visible={exoModalOpen} animationType="slide">
+				<View style={globalStyles.container}>
+					<Icon name="close" onPress={() => setExoModalOpen(false)} />
+					<Formik
+						// validationSchema={helpTypeCreateSchema}
+						initialValues={{
+							annee: currentExercise ? getDate(currentExercise.create_at).getFullYear().toString() : null,
+							date: date.toDateString(),
+						}}
+						onSubmit={(values) => {
+							handleCreateExercise(values);
+							// handlePress();
+						}}
+					>
+						{(props) => (
+							<View
+								style={{
+									// paddingVertical: 20,
+									flex: 1,
+									opacity: 1,
+									marginTop: 120,
+									borderBottomWidth: 1,
+									borderBottomColor: "#222",
+									borderTopColor: "#222",
+									borderTopWidth: 1,
+									justifyContent: "center",
+									marginBottom: 120,
+								}}
+							>
+								<View style={{ flexDirection: "row", alignItems: "center" }}>
+									<TextInput
+										label="Annee de l'exercice"
+										mode="outlined"
+										disabled
+										style={{ flex: 3, marginRight: 20 }}
+										value={annee.getFullYear().toString()}
+										theme={{ colors: { disabled: "#ff751a" } }}
+									/>
+									<Icon
+										name="calendar"
+										size={50}
+										type="foundation"
+										color="#ff751a"
+										onPress={() => setShowAnneeDP(true)}
+									/>
+								</View>
+
+								<HelperText type="error" visible={true}></HelperText>
+
+								{showAnneeDP && (
+									<DateTimePicker
+										testID="dateTimePicker"
+										value={annee}
+										mode="date"
+										is24Hour={true}
+										display="default"
+										onChange={onAnneeChange}
+									/>
+								)}
+
+								<View style={{ flexDirection: "row", alignItems: "center" }}>
+									<TextInput
+										label="Date date de début de la session"
+										mode="outlined"
+										disabled
+										style={{ flex: 3, marginRight: 20 }}
+										value={date.toDateString()}
+										theme={{ colors: { disabled: "#ff751a" } }}
+									/>
+									<Icon
+										name="calendar"
+										size={50}
+										type="foundation"
+										color="#ff751a"
+										onPress={() => setShowDateDP(true)}
+									/>
+								</View>
+								<HelperText type="error" visible={true}></HelperText>
+								{showDateDP && (
+									<DateTimePicker
+										testID="dateTimePicker"
+										value={date}
+										mode="date"
+										is24Hour={true}
+										display="default"
+										onChange={onDateChange}
+									/>
+								)}
+								<FlatButton
+									text={loading ? "loading..." : "Commencez un nouvel exercice"}
+									onPress={() => {
+										setLoading(true);
+										props.handleSubmit();
+									}}
+									color="black"
+								/>
+							</View>
+						)}
+					</Formik>
+				</View>
+			</Modal> */
+}
+
+// {exercises.length ? (
+// 	<View>
+// 		<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
+// 			<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+// 				<Card.Title>Tresorie</Card.Title>
+// 				<Card.Divider />
+// 				<View style={{ alignItems: "center" }}>
+// 					<Text>{`${newTresorie} frs CFA`}</Text>
+// 				</View>
+// 			</Card>
+// 			<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+// 				<Card.Title>Fond social</Card.Title>
+// 				<Card.Divider />
+// 				<View style={{ alignItems: "center" }}>
+// 					<Text>{`${newFondSocial} frs CFA`}</Text>
+// 				</View>
+// 			</Card>
+// 		</View>
+// 		<View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginBottom: 20 }}>
+// 			<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+// 				<Card.Title>Exercise </Card.Title>
+// 				<Card.Divider />
+// 				<View style={{ alignItems: "center" }}>
+// 					<Icon
+// 						name={isPlusExo ? "add-circle" : "cancel"}
+// 						size={70}
+// 						// disabled={exerciseExist ? false : true}
+// 						color="#ff884b"
+// 						onPress={handleExoModalOpenning}
+// 					/>
+// 				</View>
+// 			</Card>
+// 			<Card containerStyle={{ borderRadius: 10, width: 150 }}>
+// 				<Card.Title>Session </Card.Title>
+// 				<Card.Divider />
+// 				<View style={{ alignItems: "center" }}>
+// 					<Icon
+// 						name={isPlusSession ? "add-circle" : "cancel"}
+// 						size={70}
+// 						disabled={isBlurSession ? true : false}
+// 						color={isBlurSession ? "#bbb" : "#ff884b"}
+// 						onPress={handleSessionModalOpenning}
+// 					/>
+// 				</View>
+// 			</Card>
+// 		</View>

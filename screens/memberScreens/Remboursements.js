@@ -411,7 +411,7 @@ function BorrowingMember(props) {
              duration={3500}
                 style={{
 					alignSelf:'center',
-                    backgroundColor: '#FE7C00',
+                    backgroundColor: 'white',
                     height: Dimensions.get("window").height * 0.5,
                     width: Dimensions.get("window").width * 0.72,
                     // borderBottomLeftRadius: 13,

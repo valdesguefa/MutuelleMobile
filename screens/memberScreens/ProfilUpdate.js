@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import {
 	TouchableOpacity,
 	Image,
@@ -26,13 +27,20 @@ import * as ImagePicker from "expo-image-picker";
 import { TextInput } from "react-native-paper";
 //const SCREEN_HEIGHT = RN.Dimensions.get('window').height;
 import * as Animatable from "react-native-animatable";
+import axiosInstance from "../../utils/axiosInstance";
+
+
 const EMAIL_REGEX =
 	/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export default function ProfilUpdate() {
+export default function ProfilUpdate({navigation}) {
 	const [isBillingDifferent, setIsBillingDifferent] = useState(false);
 	// const { handleSubmit, control, errors } = useForm();
 	const [pickedImagePath, setPickedImagePath] = useState("");
+	useEffect(() => {
+		console.log('route.params of profile update', auth)
+	}, [auth])
+
 
 	const {
 		handleSubmit,
@@ -61,14 +69,15 @@ export default function ProfilUpdate() {
 	const [members, setmembers] = useState([]);
 	const [loadingSubmit, setloadingSubmit] = useState(false);
 
-	  //recuperation du password et email
-	  useEffect(() => {
+	//recuperation du password et email
+	useFocusEffect(React.useCallback(() => {
 		//console.log("^^^^^^^^^^^^^^^",auth.user.email)
 		setemail(auth.user.email);
 		setPassword(auth.user.password);
-	}, [auth]);
+	}, [auth]));
 	//requete vers l'API pour avoir le user correspondant
-	useEffect(() => {
+	useFocusEffect(
+		React.useCallback(() => {
 		axios
 			.get(URL + `users/`, headerObj)
 			.then((response) => {
@@ -85,12 +94,14 @@ export default function ProfilUpdate() {
 			.catch((error) => {
 				console.log("voici l'erreur", error);
 			});
-	}, [password, email]);
+		}, [password, email])	)
+	
 
 	//requete pour avoir le username de l'utilisateur correspondant
-	useEffect(() => {
+	useFocusEffect(React.useCallback(() => {
+		//console.log('**********************that is user *************',user)
 		axios
-			.get(URL + `members/`, headerObj)
+			.get(URL + `administrators/`, headerObj)
 			.then((response) => {
 				var val = [];
 				//console.log('userr infos',user['url'])
@@ -105,9 +116,9 @@ export default function ProfilUpdate() {
 			.catch((error) => {
 				console.log("voici l'erreur", error);
 			});
-	}, [user]);
+	}, [user]))
 
-	useEffect(() => {
+	useFocusEffect( React.useCallback(() => {
 		if (user) {
 			if (member["username"] !== null || member["username"] !== undefined) {
 				setValue("username", member["username"]);
@@ -118,7 +129,7 @@ export default function ProfilUpdate() {
 				setValue("adresse", user["address"]);
 			}
 		}
-	}, [user, member["username"]]);
+	}, [user, member['username']]))
 
 	const AlreadyExist = (userApp) => {
 		//console.log('*********************userApp***************',userApp)
@@ -135,13 +146,13 @@ export default function ProfilUpdate() {
 				setError("name", {
 					message: null,
 					types: {
-						myError: "ce membre existe deja",
+						myError: "cet utilisateur existe deja",
 					},
 				});
 				setError("first_name", {
 					message: null,
 					types: {
-						myError: "ce membre existe deja",
+						myError: "cet utilisateur existe deja",
 					},
 				});
 				bool = true;
@@ -185,9 +196,12 @@ export default function ProfilUpdate() {
 	};
 
 	const onSubmit = (data) => {
-		//console.log('**************************member***********************',member)
+		console.log('**************************member***********************', member)
 		setloadingSubmit(true);
 		var rep = AlreadyExist(data);
+		var passwordTest = ""
+
+		/* teste du password
 		if (userPassword !== null && userPassword !== password && isBillingDifferent) {
 			setError("userPassword", {
 				message: null,
@@ -197,7 +211,7 @@ export default function ProfilUpdate() {
 			});
 			setloadingSubmit(false);
 		}
-
+*/
 		if (newPassword !== null && confirmPassword !== null && newPassword !== confirmPassword && isBillingDifferent) {
 			setError("confirmPassword", {
 				message: null,
@@ -217,20 +231,25 @@ export default function ProfilUpdate() {
 					//  val2.append('user_id', data['user_id'])
 					//  val2.append('inscription', member['inscription'])
 					//  val2.append('administrator_id', member['administrator_id'])
+
 					axios
 						.patch(
-						URL+`members/${member["id"]}/`,
+							URL + `administrators/${member["id"]}/`,
 							{
 								username: data["username"],
 								user_id: member["user_id"],
-								administrator_id: member["administrator_id"],
+
 							},
 							headerObj
 						)
 						.then((response) => {
 							console.log("response2", response.data);
 						})
-						.catch((error) => console.log("error2", error));
+						.catch((error) => {
+							console.log("error4", error.message);
+							console.log("error4", error.response.data);
+							console.log("error4", error.response.status);
+						});
 
 					val.append("name", data["name"]);
 					val.append("first_name", data["first_name"]);
@@ -238,7 +257,6 @@ export default function ProfilUpdate() {
 					val.append("email", data["email"]);
 					val.append("tel", data["telephone"]);
 					val.append("address", data["adresse"]);
-					val.append("password", user["password"]);
 					if (pickedImagePath !== "") {
 						val.append("avatar", {
 							uri: pickedImagePath,
@@ -256,73 +274,115 @@ export default function ProfilUpdate() {
 						});
 					}
 					axios
-						.put(URL+`users/${user["id"]}/`, val, headerObj)
+						.patch(URL + `users/${user["id"]}/`, val, headerObj)
 						.then((response) => {
 							console.log("response1"); //,response)
 							setloadingSubmit(false);
+							Alert.alert('modification effectuee avec succes')
+							navigation.goBack()
 						})
 						.catch((error) => {
 							setloadingSubmit(false);
-							console.log("error1", error);
+							console.log("error5", error.message);
+							console.log("error5", error.response.data);
+							console.log("error5", error.response.status);
 						});
-				} else {
+						navigation.goBack()
+
+				}
+				else {
 					// val2.append('username', data['username'])
 					//  val2.append('active', member['active'])
 					//  val2.append('social_crown', member['social_crown'])
 					//  val2.append('user_id', data['user_id'])
 					//  val2.append('inscription', member['inscription'])
 					//  val2.append('administrator_id', member['administrator_id'])
-					axios
-						.put(
-							URL+`members/${member["id"]}/`,
-							{
-								username: data["username"],
-								user_id: member["user_id"],
-								administrator_id: member["administrator_id"],
-							},
-							headerObj
-						)
-						.then((response) => {
-							console.log("response2"); //,response)
-							//setloadingSubmit(false)
-						})
-						.catch((error) => {
-							console.log("error2", error);
-						});
+					//console.log('password ',data["confirmPassword"])
+					//console.log('old password',password)
+					//debut
+					axiosInstance.patch(`/auth/update_profile/${user["id"]}/`, {
+						first_name: data["first_name"],
+						name: data["name"],
+						email: data["email"],
+						address: data["addresse"],
+						tel: data["telephone"],
+						password: data["confirmPassword"],
+						password2: data["confirmPassword"],
+					}).then((response) => {
+						console.log('modification du password effectue avec succes')
 
-					val.append("name", data["name"]);
-					val.append("first_name", data["first_name"]);
-					val.append("sex", user["sex"]);
-					val.append("email", data["email"]);
-					val.append("tel", data["telephone"]);
-					val.append("address", data["adresse"]);
-					val.append("password", data["confirmPassword"]);
-					if (pickedImagePath !== "") {
-						val.append("avatar", {
-							uri: pickedImagePath,
-							name: "user.png",
-							fileName: "image",
-							type: "image/png",
+						axios
+							.patch(
+								URL + `administrators/${member["id"]}/`,
+								{
+									username: data["username"],
+									user_id: member["user_id"],
+									//administrator_id: member["administrator_id"],
+								},
+								headerObj
+							)
+							.then((response) => {
+								console.log("response2"); //,response)
+								//setloadingSubmit(false)
+
+							})
+							.catch((error) => {
+								console.log("error2", error);
+								console.log("error2", error.message);
+								//	console.log("error2", error.response.data);
+								//	console.log("error2", error.response.status);
+							});
+
+						val.append("name", data["name"]);
+						val.append("first_name", data["first_name"]);
+						val.append("sex", user["sex"]);
+						val.append("email", data["email"]);
+						val.append("tel", data["telephone"]);
+						val.append("address", data["adresse"]);
+						if (pickedImagePath !== "") {
+							val.append("avatar", {
+								uri: pickedImagePath,
+								name: "user.png",
+								fileName: "image",
+								type: "image/png",
+							});
+						}
+						if (pickedImagePath === "") {
+							val.append("avatar", {
+								uri: user["avatar"],
+								name: "user.png",
+								fileName: "image",
+								type: "image/png",
+							});
+						}
+						axios
+							.patch(URL + `users/${user["id"]}/`, val, headerObj)
+							.then((response) => {
+								Alert.alert("la modification des informations reussi"); //,response)
+								setloadingSubmit(false);
+							})
+							.catch((error) => {
+								setloadingSubmit(false);
+								console.log("error1", error.message);
+								console.log("error1", error.response.data);
+								console.log("error1", error.response.status);
+							});
+							navigation.goBack()
+					}).catch((error) => {
+						//console.log("error3", error.message);
+						console.log("error3", error.response.data);
+						//	console.log("error3", error.response.status);
+						setloadingSubmit(false);
+						setError("userPassword", {
+							message: null,
+							types: {
+								myError: "mot de passe incorrecte",
+							},
 						});
-					}
-					if (pickedImagePath === "") {
-						val.append("avatar", {
-							uri: user["avatar"],
-							name: "user.png",
-							fileName: "image",
-							type: "image/png",
-						});
-					}
-					axios
-						.put(URL+`users/${user["id"]}/`, val, headerObj)
-						.then((response) => {
-							console.log("la modification des informations utilisateurs c'est bien passee"); //,response)
-							setloadingSubmit(false);
-						})
-						.catch((error) => {
-							setloadingSubmit(false);
-							console.log("error1", error);
-						});
+					});
+
+
+					//fin
 				}
 				//setloadingSubmit(false)
 			}
@@ -373,7 +433,7 @@ export default function ProfilUpdate() {
 		Alert.alert("Profile Picture", "Choose an option", [
 			{ text: "Camera", onPress: openCamera },
 			{ text: "Gallery", onPress: showImagePicker },
-			{ text: "Cancel", onPress: () => {} },
+			{ text: "Cancel", onPress: () => { } },
 		]);
 	};
 
@@ -554,6 +614,7 @@ export default function ProfilUpdate() {
 				</View>
 				{isBillingDifferent && (
 					<>
+					{/*
 						<Controller
 							defaultValue=""
 							name="userPassword"
@@ -581,7 +642,7 @@ export default function ProfilUpdate() {
 									}
 								/>
 							)}
-						/>
+						/> */}
 						<Controller
 							defaultValue=""
 							name="newPassword"

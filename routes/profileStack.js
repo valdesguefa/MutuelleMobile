@@ -11,7 +11,7 @@ import ProfilUpdate from "../screens/memberScreens/ProfilUpdate";
 
 const Stack = createNativeStackNavigator();
 
-export default function profileStack() {
+export default function ProfileStack() {
 	return (
 		<Stack.Navigator
 			initialRouteName="user profile"

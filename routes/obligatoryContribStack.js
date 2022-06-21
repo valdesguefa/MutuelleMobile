@@ -4,17 +4,15 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Header from "../shared/header";
 import { Icon } from "react-native-elements";
-import EpargnesDetail from "../screens/adminScreens/EpargnesDetail";
-import Epargnes from "../screens/adminScreens/Epargnes";
-import Remboursements from "../screens/adminScreens/Remboursements";
-import RemboursementsDetail from "../screens/adminScreens/RemboursementsDetail";
+import ObligatoryContrib from "../screens/adminScreens/ObligatoryContrib";
+import ObligatoryContribDetails from "../screens/adminScreens/ObligatoryContribDetails";
 
 const Stack = createNativeStackNavigator();
 
-export default function RemboursementsStack() {
+export default function ObligatoryContribStack() {
 	return (
 		<Stack.Navigator
-			initialRouteName="remboursements"
+			initialRouteName="obligatoryContrib"
 			screenOptions={{
 				headerStyle: {
 					backgroundColor: "#eee",
@@ -24,17 +22,17 @@ export default function RemboursementsStack() {
 			}}
 		>
 			<Stack.Screen
-				name="remboursements"
-				component={Remboursements}
+				name="obligatoryContrib"
+				component={ObligatoryContrib}
 				options={{
 					headerStyle: { height: 30 },
 					headerShown: false,
-					headerTitle: () => <Header title="Les Epargnes" />,
+					headerTitle: () => <Header title="Les Contributions obligatoires" />,
 				}}
 			/>
 			<Stack.Screen
-				name="Details sur le remboursement"
-				component={RemboursementsDetail}
+				name="Details sur les contributions"
+				component={ObligatoryContribDetails}
 				options={({ navigation }) => ({
 					headerLeft: () => (
 						<Icon

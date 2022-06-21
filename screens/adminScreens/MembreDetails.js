@@ -63,7 +63,7 @@ const MembreDetails = (props) => {
 						<Text>Email:</Text>
 					</View>
 					<View style={styles.col2}>
-						<Text>{email}</Text>
+						<Text>{`${email} `}</Text>
 					</View>
 				</View>
 				<View style={styles.row}>
@@ -79,7 +79,7 @@ const MembreDetails = (props) => {
 						<Text>Address:</Text>
 					</View>
 					<View style={styles.col2}>
-						<Text>{address}</Text>
+						<Text>{address} </Text>
 					</View>
 				</View>
 				<View style={styles.row}>
@@ -87,12 +87,12 @@ const MembreDetails = (props) => {
 						<Text>Added on:</Text>
 					</View>
 					<View style={styles.col2}>
-						<Text>{hisDate}</Text>
+						<Text>{hisDate} </Text>
 					</View>
 				</View>
 				<Card.Divider />
 				<Button
-					disabled={permissions ? false : true}
+					// disabled={permissions ? false : true}
 					color="red"
 					// color={permissions ? "red" : "#bbb"}
 					title="Delete"
@@ -168,4 +168,23 @@ const styles = StyleSheet.create({
 		position: "absolute",
 		left: 140,
 	},
+	robotoBold: {
+		fontFamily: "roboto-bold",
+	},
+	robotoLight: {
+		fontFamily: "roboto-light",
+	},
+	robotoRegular: {
+		fontFamily: "roboto-regular",
+	},
+	robotoThin: {
+		fontFamily: "roboto-thin",
+	},
+	// tryFont: {
+	// 	fontFamily: "roboto-bold",
+	// },
+	// 	style={styles.robotoThin}
+	// style={styles.robotoLight}
+	// style={styles.robotoRegular}
+	// style={styles.robotoBold}
 });

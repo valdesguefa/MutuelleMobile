@@ -202,7 +202,7 @@ export default class CarouselHelp extends Component {
         return (
             <View
                 style={{
-                    backgroundColor: '#FE7C00',
+                    backgroundColor: '#FF884B',
                     height: Dimensions.get("window").height * 0.37,
                     width: Dimensions.get("window").width * 0.8,
                     // borderBottomLeftRadius: 13,

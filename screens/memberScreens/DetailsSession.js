@@ -174,14 +174,14 @@ const DetailsSession = () => {
                                 
                             >
                                 <Surface style={styles.surface}>
-                                    <View><Text style={{ fontFamily: 'poppinsBold', fontSize: 16,color:'blue' }} numberOfLines={1}>{index + 1}  Session du {item.sessionId['date']}</Text></View>
+                                    <View><Text style={{ fontFamily: 'poppinsBold', fontSize: 16,color:'black' }} numberOfLines={1}>{/* {index + 1}  Session du */} {item.sessionId['date'] }</Text></View> 
                                     <View
 
                                     >
-                                        <Text style={{ fontSize: 16,marginBottom:-5, marginLeft: 15, fontFamily: 'poppinsMedium' }}>Total des épargnes : <Text style={{ fontFamily: 'poppinsLight', fontSize: 15 }}>{item.saving} XAF</Text>
+                                        <Text style={{ fontSize: 13,marginBottom:-5, marginLeft: 15, fontFamily: 'poppinsMedium' }}>Total des épargnes : <Text style={{ fontFamily: 'poppinsLight', fontSize: 15 }}>{item.saving} XAF</Text>
                                         </Text>
-                                        <Text style={{ fontSize: 16,marginBottom:-5, marginLeft: 15, fontFamily: 'poppinsMedium' }}>Total des remboursements : <Text style={{ fontFamily: 'poppinsLight', fontSize: 15 }}>{item.refund} XAF</Text></Text>
-                                        <Text style={{ fontSize: 16,marginBottom:-5, marginLeft: 15, fontFamily: 'poppinsMedium' }}>Total des emprunts : <Text style={{ fontFamily: 'poppinsLight', fontSize: 15 }}>{item.borrow} XAF</Text></Text>
+                                        <Text style={{ fontSize: 13,marginBottom:-5, marginLeft: 15, fontFamily: 'poppinsMedium' }}>Total des remboursements : <Text style={{ fontFamily: 'poppinsLight', fontSize: 15 }}>{item.refund} XAF</Text></Text>
+                                        <Text style={{ fontSize: 13,marginBottom:-5, marginLeft: 15, fontFamily: 'poppinsMedium' }}>Total des emprunts : <Text style={{ fontFamily: 'poppinsLight', fontSize: 15 }}>{item.borrow} XAF</Text></Text>
                                     </View>
                                 </Surface>
                             </Animated.View>
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     },
     surface: {
         height: 110,
-        backgroundColor: '#FE7C00',
+        backgroundColor: 'white',
         width: Dimensions.get('window').width * 0.85,
         marginBottom: 10,
         padding: 2,

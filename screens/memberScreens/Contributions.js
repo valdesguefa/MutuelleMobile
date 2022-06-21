@@ -348,7 +348,8 @@ const styles = StyleSheet.create({
     },
     surface: {
         height: 145,
-        backgroundColor: '#FE7C00',
+        backgroundColor: 'white',
+        elevation:13,
         width: Dimensions.get('window').width * 0.87,
         marginBottom: 10,
         marginTop:12,

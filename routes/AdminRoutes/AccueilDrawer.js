@@ -34,6 +34,8 @@ function getHeaderTitle(route) {
 	switch (routeName) {
 		case "Accueil":
 			return "Accueil";
+		case "Contribution":
+			return "Cotisations Obligatoires";
 		case "Epargnes":
 			return "Epargnes";
 		case "Remboursements":
@@ -74,11 +76,11 @@ function CustomDrawerContent(props) {
 			<DrawerItem
 				inactiveBackgroundColor="#ccc"
 				label="BACK TO TABS"
-				icon={() => <Icon type="entypo" name="dots-three-horizontal" />}
+				icon={() => <Icon name="home" />}
 				onPress={() => props.navigation.navigate("AccueilTab")}
 			/>
 			<DrawerItem
-				label=""
+				label={auth.user.first_name + " " + auth.user.name}
 				icon={() => (
 					<Avatar
 						containerStyle={{ marginleft: 100 }}
@@ -107,25 +109,25 @@ function CustomDrawerContent(props) {
 				onPress={() => props.navigation.navigate("TypeDaides")}
 			/>
 			<DrawerItem
-				label="Configuration"
+				label="Configurations"
 				icon={() => <Icon name="settings" />}
 				onPress={() => props.navigation.navigate("Configurations")}
 			/>
-			<DrawerItem
-				label="Session"
+			{/* <DrawerItem
+				label="Sessions"
 				icon={() => <Icon name="monetization-on" />}
 				onPress={() => props.navigation.navigate("Session")}
-			/>
+			/> */}
 			<DrawerItem
 				label="Exercices"
 				icon={() => <Icon name="run-circle" />}
 				onPress={() => props.navigation.navigate("Exercices")}
 			/>
-			<DrawerItem
+			{/* <DrawerItem
 				label="Dettes"
 				icon={() => <Icon name="money-off" />}
 				onPress={() => props.navigation.navigate("Dettes")}
-			/>
+			/> */}
 			<DrawerItem
 				label="Aides"
 				icon={() => <Icon name="help-outline" />}
@@ -155,7 +157,7 @@ export default function AccueilDrawer() {
 				),
 
 				headerStyle: {
-					backgroundColor: "#f4511e",
+					backgroundColor: "#ff884b",
 				},
 				headerTintColor: "#fff",
 				headerTitleAlign: "center",
@@ -186,14 +188,22 @@ export default function AccueilDrawer() {
 			<Drawer.Screen name="Administrateurs" component={AdminStack} />
 			<Drawer.Screen name="TypeDaides" component={TypeDaides} />
 			<Drawer.Screen name="Configurations" component={Configurations} />
-			<Drawer.Screen name="Session" options={{
+			<Drawer.Screen
+				name="Session"
+				options={{
 					headerShown: false,
-				}} component={SessionStack} />
+				}}
+				component={SessionStack}
+			/>
 			<Drawer.Screen name="Exercices" component={Exercices} />
 			<Drawer.Screen name="Dettes" component={Dettes} />
-			<Drawer.Screen name="Aides" options={{
+			<Drawer.Screen
+				name="Aides"
+				options={{
 					headerShown: false,
-				}} component={AdminHelpStack} />
+				}}
+				component={AdminHelpStack}
+			/>
 			<Drawer.Screen name="Deconnexion" component={Deconnexion} />
 		</Drawer.Navigator>
 	);

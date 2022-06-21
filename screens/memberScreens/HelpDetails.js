@@ -9,6 +9,7 @@ import { Dimensions, ScrollView } from "react-native";
 import { Avatar, Icon } from "react-native-elements";
 import axiosNoTokenInstance from "../../utils/axiosNoTokenInstance";
 import left from '../../assets/icons8_left_24px.png'
+import { StatusBar } from "expo-status-bar";
 
 const HelpDetails = ({ route, navigation }) => {
 	const [member, setmember] = useState("");
@@ -267,6 +268,7 @@ const HelpDetails = ({ route, navigation }) => {
 		// console.log('memberNoContribute ------------------------------------------------', memberNoContribute)
 		return (
 			<View style={{ backgroundColor: "white" }}>
+				<StatusBar translucent={true}></StatusBar>
 				<Text></Text>
 				<View style={styles.header}>
 					<Text
@@ -474,7 +476,7 @@ const styles = StyleSheet.create({
 		marginLeft: 20,
 	},
 	header: {
-		backgroundColor: "#FE7C00",
+		backgroundColor: "#FF884B",
 		height: Dimensions.get("window").height * 0.13,
 		width: Dimensions.get("window").width,
 		top: Dimensions.get("window").height * 0.017,
@@ -484,7 +486,7 @@ const styles = StyleSheet.create({
 		position: "relative",
 	},
 	underheader: {
-		backgroundColor: "#FE7C00",
+		backgroundColor: "#FF884B",
 		height: Dimensions.get("window").height * 0.18,
 		width: Dimensions.get("window").width,
 		position: "relative",
@@ -493,7 +495,7 @@ const styles = StyleSheet.create({
 		bottom: 0,
 	},
 	footer: {
-		backgroundColor: "#FE7C00",
+		backgroundColor: "#FF884B",
 		height: Dimensions.get("window").height * 0.13,
 		width: Dimensions.get("window").width,
 		bottom: -18,

@@ -8,6 +8,7 @@ import { Icon } from "react-native-elements";
 import epargnesStack from "../epargnesStack";
 import empruntStack from "../empruntStack";
 import remboursementsStack from "../remboursementsStack";
+import ObligatoryContribStack from "../obligatoryContribStack";
 const Tab = createBottomTabNavigator();
 
 export default function MemAccueilTab() {
@@ -19,6 +20,8 @@ export default function MemAccueilTab() {
 
 					if (route.name === "Accueil") {
 						iconName = focused ? "home" : "home";
+					} else if (route.name === "Contribution") {
+						iconName = focused ? "attach-money" : "attach-money";
 					} else if (route.name === "Epargnes") {
 						iconName = focused ? "vertical-align-bottom" : "vertical-align-bottom";
 					} else if (route.name === "Remboursements") {
@@ -36,6 +39,7 @@ export default function MemAccueilTab() {
 			})}
 		>
 			<Tab.Screen name="Accueil" component={Accueil} />
+			<Tab.Screen name="Contribution" component={ObligatoryContribStack} />
 			<Tab.Screen name="Epargnes" component={epargnesStack} />
 			<Tab.Screen name="Remboursements" component={remboursementsStack} />
 			<Tab.Screen name="Emprunts" component={empruntStack} />

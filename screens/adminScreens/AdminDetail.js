@@ -55,7 +55,7 @@ const AdminDetail = (props) => {
 						<Text>Last name:</Text>
 					</View>
 					<View style={styles.col2}>
-						<Text>{name}</Text>
+						<Text>{`${name} `}</Text>
 					</View>
 				</View>
 				<View style={styles.row}>

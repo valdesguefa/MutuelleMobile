@@ -15,6 +15,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { Dropdown } from "react-native-element-dropdown";
 import FlatButton from "../../shared/button";
+import { useFocusEffect } from "@react-navigation/native";
 
 const helpTypeCreateSchema = yup.object({
 	montant: yup
@@ -32,6 +33,35 @@ export default function Epargnes({ navigation }) {
 	const [modalOpen, setModalOpen] = useState(false);
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [currentSessionsState, setCurrentSessionsState] = useState("");
+
+	const fetchAndSetCurrentSessionState = async () => {
+		try {
+			let res = await axiosNoTokenInstance.get("/sessions_/");
+			const newSessions = res.data;
+			if (newSessions.length) {
+				let currentSessionState = newSessions[newSessions.length - 1].active;
+				setCurrentSessionsState(currentSessionState == 0 ? "inActiveSession" : "activeSession");
+			} else {
+				setCurrentSessionsState("inActiveSession");
+			}
+		} catch (err) {
+			console.log(err.message);
+			console.log(err.response.data);
+			console.log(err.response.status);
+		}
+	};
+
+	useFocusEffect(
+		React.useCallback(() => {
+			fetchAndSetCurrentSessionState();
+
+			return () => {
+				// Do something when the screen is unfocused
+				// Useful for cleanup functions
+			};
+		}, [])
+	);
 
 	// console.log("SESSIONS:", sessions);
 
@@ -107,8 +137,6 @@ export default function Epargnes({ navigation }) {
 		return date.toDateString();
 	};
 
-	console.log("sessions", sessions);
-
 	const [value, setValue] = useState(null);
 	const [isFocus, setIsFocus] = useState(false);
 
@@ -127,7 +155,6 @@ export default function Epargnes({ navigation }) {
 				member_id: value,
 				session_id: auth.current_session_id,
 			});
-			console.log("RESULT:", res.data);
 			savingDispatch({
 				type: "ADD_SAVING",
 				payload: res.data,
@@ -239,8 +266,9 @@ export default function Epargnes({ navigation }) {
 						<TouchableOpacity onPress={() => navigation.navigate("Details sur L'epargne", item)}>
 							<ListItem bottomDivider containerStyle={{ borderRadius: 20, marginBottom: 20 }}>
 								<ListItem.Content>
-									<ListItem.Title>{`Session id: ${item.id}`}</ListItem.Title>
-									<ListItem.Subtitle>{`Session date: ${getDate(item.date)}`}</ListItem.Subtitle>
+									<ListItem.Title>{`Session de: ${getDate(item.create_at)}${
+										item.active ? "\n(en cours)" : ""
+									}`}</ListItem.Title>
 									<ListItem.Subtitle>{`montant total des eparges: ${getTotal(item)}`}</ListItem.Subtitle>
 								</ListItem.Content>
 								<Icon name="arrow-forward-ios" type="material" color="#ff751a" />
@@ -255,8 +283,8 @@ export default function Epargnes({ navigation }) {
 			<Icon
 				name="add-circle"
 				size={70}
-				disabled={auth.current_state == "SAVING" ? false : true}
-				color={auth.current_state == "SAVING" ? "#f4511e" : "#bbb"}
+				disabled={currentSessionsState == "inActiveSession" ? true : false}
+				color={currentSessionsState == "inActiveSession" ? "#bbb" : "#ff884b"}
 				containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 				onPress={() => setModalOpen(true)}
 			/>

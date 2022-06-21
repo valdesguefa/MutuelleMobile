@@ -9,7 +9,7 @@ import Epargnes from "../screens/adminScreens/Epargnes";
 
 const Stack = createNativeStackNavigator();
 
-export default function epargnesStack() {
+export default function EpargnesStack() {
 	return (
 		<Stack.Navigator
 			initialRouteName="epargnes"

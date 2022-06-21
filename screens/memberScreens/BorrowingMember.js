@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
 	},
 	surface: {
 		height: height * 0.13,
-		backgroundColor: "#FE7C00",
+		backgroundColor: "#FF884B",
 		width: Dimensions.get("window").width * 0.87,
 		marginBottom: 10,
 		padding: 2,

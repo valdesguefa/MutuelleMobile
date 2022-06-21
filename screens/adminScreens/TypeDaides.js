@@ -186,7 +186,7 @@ export default function TypeDaides() {
 				<Icon
 					name="add-circle"
 					size={70}
-					color="#f4511e"
+					color="#ff884b"
 					containerStyle={{ position: "absolute", bottom: 10, right: 10 }}
 					onPress={() => setModalOpen(true)}
 				/>

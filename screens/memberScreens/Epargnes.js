@@ -141,15 +141,13 @@ function Epargnes() {
 		var userId = "";
 		for (let obj1 of members) {
 			if (membeId === obj1.id) {
-				axios
-					.get(obj1.user_id, headerObj)
-					.then((response) => {
-						obj.name = response.data["name"] + " " + response.data["first_name"];
-						obj.avatar = response.data["avatar"];
-						setinter(obj.name);
-					})
-					.catch((error) => console.log(error));
-
+				/*
+                                axios.get(obj1.user_id, headerObj).then((response) => {
+                                    obj.name = response.data['name'] + " " + response.data['first_name']
+                                    obj.avatar = response.data['avatar']
+                                    setinter(obj.name)
+                                }).catch(error => console.log(error))
+                */
 				userId = obj1["user_id"];
 				for (let obj2 of users) {
 					if (userId === obj2["id"]) {
@@ -281,8 +279,9 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	surface: {
-		height: 110,
-		backgroundColor: "#FE7C00",
+		height: 145,
+		backgroundColor: "white",
+		elevation:13,
 		width: Dimensions.get("window").width * 0.87,
 		marginBottom: 10,
 		marginTop: 12,

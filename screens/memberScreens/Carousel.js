@@ -47,7 +47,8 @@ export default class CarouselComponent extends React.Component {
 		return (
 			<View
 				style={{
-					backgroundColor: "#FE7C00",
+					backgroundColor: "white",
+					
 					borderRadius: 10,
 					height: 550,
 					padding: 30,
@@ -57,7 +58,8 @@ export default class CarouselComponent extends React.Component {
 					borderTopRightRadius: 10,
 					shadowOffset: 10,
 					shadowColor: "black",
-					shadowOpacity: 0.5,
+					shadowOpacity: 0.8,
+					elevation:10,
 					marginLeft: 25,
 					marginBottom: 50,
 					justifyContent: "center",
